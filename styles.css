@@ -257,8 +257,72 @@ footer a:hover{color:var(--gold)}
   .chips{width:min(22vw,320px)}.pack{width:min(14vw,200px)}
 }
 
-/* MOBILE ONLY (phones + tablets, below the 860px desktop breakpoint) — pairs exactly
-   with the site's @media(min-width:860px) desktop query. Desktop keeps the base value. */
+/* ===== 11. UNIVERSAL FIT + HERO LOCK v2 — phones, tablets, desktops, smart displays =====
+   The hero art (sun / fries / pack) is PINNED TO THE SAVANNA SILHOUETTE at every screen
+   size, so it sits at the exact same depth everywhere:
+     • ≤859.98px  phones + tablets held portrait (iPad mini / iPad / Air / Pro 11")
+     • ≥860px     tablets held landscape (1024–1366), Surface Pro, smart displays, desktops
+   DEPTH DIALS (all fixed rem — no vw — so they're identical on every device in range):
+     • Sun   → .hero.home .art --dip   (deeper = sun sets further behind the treeline)
+     • Fries → .chips bottom           (more negative = sunk deeper into the silhouette)
+     • Pack  → .pack bottom            (≈0 = resting exactly on the treeline)            */
+
+/* --- (A) No horizontal overflow on ANY screen (280px foldables → ultrawide) --- */
+html{overflow-x:clip}                     /* viewport-level clip: rotated marquee + full-bleed soil band */
+.ht,.card>div,.stats>div{min-width:0}     /* grid children can never force the page wider */
+input,textarea{min-width:0}               /* inputs can't push past the form on tiny screens */
+address,.err,.lw{overflow-wrap:anywhere}  /* one long email/status word breaks instead of poking out */
+.stats{grid-template-columns:repeat(3,minmax(0,1fr))} /* "3,000+" shrinks its track, never the page */
+.seg{flex-wrap:wrap;max-width:100%}       /* packaging toggle stacks to two pills on narrow screens */
+.sk{flex:none}                            /* the skyline divider can never be squashed by the flex hero */
+
+/* --- (B) LOCK: phones + tablets in portrait (below the 860px breakpoint) ---
+   The home hero grid stretches to fill ALL space above the skyline, so the art
+   column's bottom edge lands exactly on the treeline on every device. */
 @media(max-width:859.98px){
-  .chips{bottom:-7rem} /* sink the fries pile into the treeline on small screens */
+  .hero.home .hgrid{flex:1;margin-block:0;grid-template-rows:auto 1fr} /* stretch to the treeline — no centering slack */
+  .art{--dip:7rem}                   /* sun depth, inner pages */
+  .hero.home .art{--dip:4rem}        /* sun depth, home — the value you tuned on phones */
+  .chips{bottom:-3rem}               /* fries pile sunk into the treeline */
+  .pack{bottom:1rem}               /* pack just kissing the treeline */
+  .hero.home .ht{margin-top:1.5rem}  /* breathing room under the header — EDIT or delete */
+}
+
+/* --- (B+) Tablet-portrait tuning (600–859.98px: iPad mini/iPad/Air/Pro upright,
+   unfolded foldables). The sun renders up to 460px wide here, so it sets a touch
+   deeper to match the phone look. Delete this block for strict phone-identical values. --- */
+@media(min-width:600px) and (max-width:859.98px){
+  .hero.home .art{--dip:10rem}
+  .chips{bottom:-9rem}
+  .pack{bottom:-1rem}
+}
+
+/* --- (C) LOCK: tablets in landscape + desktops (≥860px). Same pinning, two-column
+   hero: the grid fills all space above the skyline, the ART column aligns to its
+   bottom edge (the treeline) while the text column keeps its vertical centre. --- */
+@media(min-width:860px){
+  .hero.home .hgrid{flex:1;margin-block:0} /* fill everything above the skyline — kills the centering slack */
+  .art{align-self:end}             /* pin the art column's base onto the treeline (text stays centred) */
+  .art{--dip:8rem}                 /* sun depth, inner pages — fixed value: identical on every screen */
+  .hero.home .art{--dip:7rem}     /* sun depth, home — was a vw clamp that shifted per device */
+  .chips{bottom:-5rem}             /* fries pile — old values were compensating for the float; retune freely */
+  .pack{bottom:2rem}              /* pack resting on the treeline */
+}
+
+/* --- (D) Landscape phones & very short viewports (≤859.98px wide AND ≤500px tall) ---
+   The full-height hero is cramped sideways-on, so the scene shrinks to fit. */
+@media(max-width:859.98px) and (max-height:500px){
+  .hero.home{padding-top:5rem}     /* tighter gap under the header */
+  .art{min-height:200px}           /* shorter art column */
+  .sunimg{width:min(50vw,300px)}   /* smaller sun */
+  .chips{width:min(30vw,220px)}    /* smaller fries pile */
+  .pack{width:min(18vw,130px)}     /* smaller pack */
+}
+
+/* --- (E) Extra-small screens (Galaxy Fold etc., ≤400px) — tighten, never overflow --- */
+@media(max-width:400px){
+  .stats{gap:.5rem}
+  .stats b{font-size:2rem}         /* smaller counter so "3,000+" always fits */
+  .stats span{font-size:.8rem}
+  .card{grid-template-columns:1fr clamp(80px,28vw,110px)} /* slimmer card thumbs */
 }
