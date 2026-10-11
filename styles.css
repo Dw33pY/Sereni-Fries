@@ -1,0 +1,264 @@
+/* ==========================================================================
+   SERENI FRIES – styles.css
+   Sections: 1 Tokens · 2 Base · 3 Preloader · 4 Page wipe · 5 Header/Menu
+             6 Buttons · 7 Hero · 8 Shared blocks · 9 Footer · 10 Desktop
+   Anything marked EDIT is safe to tweak without breaking layout.
+   ========================================================================== */
+
+/* ===== 1. TOKENS — the whole site's personality. EDIT colours, fonts, radius here. ===== */
+:root{
+  --gold:#F4B400;   /* brand gold — buttons, marquee band, loader curtain, accents */
+  --sun:#F28C28;    /* warm orange — spare accent (unused by default) */
+  --soil:#2A1B12;   /* dark roast brown — text, outlines, footer, mobile menu */
+  --field:#1F5B3A;  /* deep green — links, stat numbers, green sections */
+  --salt:#FBF8EF;   /* warm cream — page background */
+  --r:22px;         /* corner radius for cards, images, photos */
+  --fd:'Bricolage Grotesque',system-ui,sans-serif; /* display font — headings only */
+  --fb:'Figtree',system-ui,sans-serif;             /* body font — everything else */
+  --ease:cubic-bezier(.7,0,.2,1)                   /* signature easing for curtains + menu */
+}
+
+/* ===== 2. BASE ===== */
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:76px} /* 76px ≈ header height, keeps jumps clear of it */
+body{font:400 1rem/1.65 var(--fb);color:var(--soil);background:var(--salt);overflow-x:hidden}
+body.loading{overflow:hidden} /* scroll lock while the preloader runs — removed by boot() in script.js */
+img{max-width:100%;display:block}
+a{color:inherit}
+main:focus{outline:0} /* <main> is focused on page change; a ring here would be noise */
+:focus-visible{outline:3px solid var(--field);outline-offset:3px} /* keyboard users still get a clear ring */
+h1,h2,h3{font-family:var(--fd);line-height:1.04;letter-spacing:-.02em}
+h2{font-size:clamp(2rem,7vw,3.6rem);font-weight:800}
+h3{font-size:1.4rem;font-weight:700}
+.wrap{width:min(1120px,100% - 2.5rem);margin-inline:auto} /* content width — EDIT 1120px to widen/narrow */
+.sec{padding:5rem 0} /* vertical rhythm of a standard section — EDIT to breathe more/less */
+.skip{position:absolute;left:-999px}.skip:focus{left:1rem;top:1rem;z-index:200;background:var(--gold);padding:.5rem 1rem}
+/* Word-split headline masks: script.js wraps each word in .w>span and slides it up */
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}.w>span{display:inline-block}
+
+/* ===== 3. HOME PRELOADER — a box of fries that fills as the page loads =====
+   Timing, status words and skip behaviour live in boot() in script.js.
+   Structure (index.html): #loader > .lp curtain halves + .lc > .llogo + .fries (7 <i>) + .pct + .lw.
+   The counter --p (0–100) is set by JS; each fry grows once --p passes its own threshold. */
+#loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;cursor:pointer} /* click = skip */
+.lp{position:absolute;top:0;bottom:0;width:50.1%;background:var(--gold);transition:transform .9s var(--ease)} /* curtain halves */
+.lp.l{left:0}.lp.r{right:0}
+.done .l{transform:translateX(-100%)}.done .r{transform:translateX(100%)} /* the split-open finish */
+.lc{position:relative;display:grid;justify-items:center;gap:1rem;min-width:260px;color:var(--soil);transition:opacity .4s}
+.done .lc{opacity:0}
+/* THE FRY BOX: the fries stand inside it. EDIT width/height to resize the whole graphic. */
+.fries{position:relative;display:flex;align-items:flex-end;justify-content:center;gap:10px;width:210px;max-width:64vw;height:150px;transition:opacity .4s}
+.fries::after{ /* the box itself: soil-dark with a gold brand stripe. EDIT 56px to deepen, the
+                 30px/38px stripe positions to move the gold band up/down the box. */
+  content:"";position:absolute;z-index:2;left:0;right:0;bottom:0;height:56px;border-radius:18px 18px 22px 22px;
+  background:linear-gradient(#0000 30px,var(--gold) 30px 38px,#0000 38px) var(--soil);
+  box-shadow:inset 0 6px 0 #ffffff17} /* soft inner light along the box opening */
+/* One fry: golden gradient + salt speckles + soil outline (matches the site's outlined art).
+   Salt density = the 11px 15px tile size (smaller = more salt). Fry colour = the two hexes. */
+.fries i{position:relative;z-index:1;width:17px;height:100%;border:3px solid var(--soil);border-radius:9px;
+  background:radial-gradient(#fff9 1.4px,#0000 1.6px) 0 0/11px 15px,linear-gradient(180deg,#FFDF7E,#F4B400);
+  box-shadow:inset 2px 3px 0 #fff3; /* subtle sheen on each fry's top-left */
+  transform-origin:bottom;
+  transform:scaleY(clamp(.06,calc((var(--p,0) - var(--i)*10)/34),1))} /* fry n is fully grown when --p passes n*10 + 34 */
+/* Per-fry settings: --i = growth order; height/rotate give the hand-cut, organic look.
+   EDIT freely — just keep all seven <i> in the HTML. */
+.fries i:nth-child(1){--i:0;height:78%;rotate:-2deg}
+.fries i:nth-child(2){--i:1;height:96%;rotate:1.5deg}
+.fries i:nth-child(3){--i:2;height:70%;rotate:-1deg}
+.fries i:nth-child(4){--i:3;height:100%}
+.fries i:nth-child(5){--i:4;height:88%;rotate:2deg}
+.fries i:nth-child(6){--i:5;height:74%;rotate:-1.5deg}
+.fries i:nth-child(7){--i:6;height:92%;rotate:1deg}
+.pct{font:800 3.5rem/1 var(--fd);transition:opacity .4s} /* the big counter */
+.pct::after{content:"%";font-size:.42em;margin-left:.05em} /* decorative % sign — JS keeps writing only the number */
+.lw{min-height:1.6em;font-weight:700;transition:opacity .4s} /* status line (words set by boot() in script.js) */
+/* Finish sequence: numbers fade, the logo pops in (.fin), then the curtain splits (.done) */
+.llogo{position:absolute;top:50%;left:50%;width:min(220px,60vw);translate:-50% -50%;scale:.7;opacity:0;transition:opacity .6s,scale .8s cubic-bezier(.2,1.4,.4,1)}
+.fin .llogo{opacity:1;scale:1}
+.fin .fries,.fin .pct,.fin .lw{opacity:0}
+
+/* ===== 4. PAGE TRANSITION CURTAIN (gold wipe between pages) ===== */
+#wipe{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:var(--gold);visibility:hidden;pointer-events:none}
+#wipe img{width:140px} /* logo shown on the curtain mid-transition */
+
+/* ===== 5. HEADER + MOBILE MENU (circle reveal from the burger) ===== */
+header{position:fixed;inset:0 0 auto;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:.6rem 1.25rem;padding-top:calc(.6rem + env(safe-area-inset-top,0px));} /* safe-area keeps clear of notches */
+header::before{content:"";position:absolute;inset:0;z-index:-1;background:#fbf8efd9;backdrop-filter:blur(12px)} /* frosted bar */
+.brand,#burger{position:relative;z-index:1} /* stay clickable above the open menu */
+.brand img{height:42px;transition:opacity .3s}
+.open .brand img{opacity:0} /* logo hides while the fullscreen menu is open (it reappears on the menu itself via the finish state) */
+/* Mobile menu. FIX: "visibility 0s .7s" keeps it VISIBLE while the circle closes, then hides —
+   previously it vanished instantly, so the closing animation was never seen. The .open rule
+   below switches visibility with no delay so opening still feels instant. */
+#menu{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;gap:.4rem;padding:2rem 1.5rem;background:var(--soil);clip-path:circle(0 at calc(100% - 40px) 40px);visibility:hidden;transition:clip-path .7s var(--ease),visibility 0s .7s var(--ease)}
+.open #menu{clip-path:circle(160% at calc(100% - 40px) 40px);visibility:visible;transition:clip-path .7s var(--ease)}
+#menu a{font:800 clamp(2rem,9vw,3rem)/1.2 var(--fd);color:var(--salt);text-decoration:none}
+#menu a[aria-current]{color:var(--gold)} /* the page you're on */
+#burger{width:44px;height:44px;border:0;border-radius:50%;background:var(--gold);cursor:pointer;display:grid;place-content:center;gap:6px}
+#burger span{width:20px;height:2px;background:var(--soil);transition:transform .4s} /* morphs into an X when open */
+.open #burger span:first-child{transform:translateY(4px) rotate(45deg)}
+.open #burger span:last-child{transform:translateY(-4px) rotate(-45deg)}
+
+/* ===== 6. BUTTONS (the magnetic pull on hover is added by script.js) ===== */
+.btn{display:inline-block;margin:0 .5rem .6rem 0;padding:.9rem 1.5rem;border:2px solid var(--soil);border-radius:99px;background:var(--soil);color:var(--salt);font:700 1rem var(--fb);text-decoration:none;cursor:pointer;transition:background .25s,color .25s,border-color .25s}
+.btn:hover{background:var(--field);border-color:var(--field)}
+.btn.ghost{background:none;color:var(--soil)}.btn.ghost:hover{color:var(--salt)} /* outline style — swaps to filled on hover */
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--soil)}.btn.gold:hover{background:var(--salt);border-color:var(--salt)}
+
+/* ===== 7. HERO — animated scene: rotating rays, drifting clouds, floating sun, pointer parallax ===== */
+.hero{position:relative;overflow:hidden;display:flex;flex-direction:column;padding-top:6.5rem;background:linear-gradient(#FFD966,#FFF1BF)} /* warm sky — EDIT the two hexes to change the sky */
+.hero.home{min-height:100svh} /* only the home hero is full viewport height */
+.rays{position:absolute;left:50%;top:45%;width:170vmax;aspect-ratio:1;translate:-50% -50%;background:repeating-conic-gradient(#fff5 0 6deg,transparent 6deg 12deg);mask-image:radial-gradient(circle,#000,transparent 55%);animation:spin 120s linear infinite;pointer-events:none} /* sunburst — 120s = one rotation (higher = slower) */
+@keyframes spin{to{rotate:360deg}}
+.cloud{position:absolute;left:0;width:120px;height:36px;border-radius:99px;background:#fff9;animation:drift 50s linear infinite;pointer-events:none} /* one cloud crossing — 50s per crossing (higher = slower) */
+.cloud.c1{top:16%}.cloud.c2{top:30%;scale:.7;animation-duration:70s;animation-delay:-30s}.cloud.c3{top:8%;scale:1.3;animation-duration:90s;animation-delay:-60s}
+@keyframes drift{from{translate:-25vw 0}to{translate:110vw 0}}
+.hgrid{position:relative;z-index:2;display:grid;gap:1rem;margin-block:auto} /* auto margins centre the hero content vertically */
+.ht h1{font-size:clamp(2.4rem,9vw,5.2rem);font-weight:800}
+.ht p{max-width:34ch;margin:1rem 0 1.5rem;font-size:1.15rem}
+/* Art: children rise in once, then follow the pointer. JS only sets --mx/--my (-0.5..0.5);
+   --k below = how far each layer drifts (higher = more parallax). EDIT per layer. */
+.art{position:relative;display:grid;place-items:end center;min-height:260px;--dip:clamp(7rem,10vw,9rem)}
+/* --dip = how far the sun SINKS BEHIND the savanna silhouette. Increase = lower sun,
+   decrease = higher sun. The skyline divider (.sk) paints over it, so it can never
+   poke through — it just sets deeper behind the trees. */
+.hero.home .art{--dip:clamp(8rem,14vw,14rem)} /* home hero is full-height and centred, so it needs a deeper dip */
+.art>*{transform:translate(calc(var(--mx,0)*var(--k,20)*-1px),calc(var(--my,0)*var(--k,20)*-.6px));transition:transform .5s ease-out;animation:rise 1.1s var(--ease) both paused}
+body:not(.loading) .art>*{animation-play-state:running} /* rise waits for the preloader to finish */
+@keyframes rise{from{opacity:0;translate:0 70px}}
+.sunw{--k:18;margin-bottom:calc(var(--dip)*-1)} /* the negative margin dips the sun behind the treeline */
+.sunimg{width:min(80vw,460px);height:auto;animation:float 7s ease-in-out infinite} /* 7s bob speed — higher = calmer */
+@keyframes float{50%{translate:0 -14px}} /* how far the sun floats up mid-cycle */
+.chips,.pack{position:absolute;height:auto}
+.chips{--k:44;right:0;bottom:-12rem;width:min(42vw,300px)} /* the fries pile — home page only */
+.pack{--k:60;left:0;bottom:0;width:min(26vw,180px);rotate:-6deg} /* the pack shot — home page only */
+/* Savanna silhouette divider. The PNG's alpha is recoloured to --soil with a drop-shadow
+   trick, so the original image colour doesn't matter. */
+.sk{position:relative;z-index:3;overflow:hidden;line-height:0;margin-top:-1px} /* z-index 3 = skyline paints OVER the dipping sun */
+.sk img{width:100%;height:auto;translate:-100vw 0;filter:drop-shadow(100vw 0 0 var(--soil))}
+.sk.gold{background:var(--gold)} /* variant used after gold CTA sections */
+/* The first section after every hero sits on the soil band, so the silhouette flows into it */
+.hero + section:not(.green){margin-top:-1px;background:var(--soil);color:var(--salt);box-shadow:0 0 0 100vmax var(--soil);clip-path:inset(0 -100vmax)}
+/* Light-on-dark recolours for anything inside that soil band */
+.hero + section .stats b{color:var(--gold)}
+.hero + section .btn{background:var(--gold);border-color:var(--gold);color:var(--soil)}
+.hero + section .btn:hover{background:var(--salt);border-color:var(--salt)}
+.hero + section .btn.ghost{background:none;border-color:var(--salt);color:var(--salt)}
+.hero + section .btn.ghost:hover{background:var(--salt);color:var(--soil)}
+.hero + section .card .btn{background:var(--soil);border-color:var(--soil);color:var(--salt)}
+.hero + section .press a:hover h3{color:var(--gold)}
+.hero + section .err{color:#ffb4a6}
+.hero + section [aria-invalid=true]{border-color:#ffb4a6}
+.logos{width:100%;height:auto;border-radius:var(--r);background:#fff} /* client logos: natural ratio, never cropped */
+.badge{max-width:200px;height:auto;margin-top:1.2rem;border-radius:12px}
+
+/* ===== 8. SHARED BLOCKS ===== */
+.intro{display:grid;gap:2rem}
+.intro p,.lead{font-size:1.2rem;max-width:56ch;margin-bottom:1.2rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.5rem 0 2rem} /* 3 stat columns at every size */
+.stats b{display:block;font:800 clamp(2.2rem,9vw,3.8rem)/1 var(--fd);color:var(--field)}
+.stats span{display:block;font-size:.9rem;line-height:1.3}
+/* Scrolling product marquee — 28s per loop (lower = faster, higher = slower). -1.5deg = the tilt. */
+.belt{overflow:hidden;background:var(--gold);padding:1rem 0;transform:rotate(-1.5deg);margin:2rem -2%}
+.mq{display:flex;width:max-content;animation:mq 28s linear infinite}
+.mq span{padding-right:2.5rem;font:800 clamp(1.6rem,5vw,2.6rem) var(--fd);white-space:nowrap}
+@keyframes mq{to{transform:translateX(-50%)}}
+/* Green slanted section — the 4vw values are the slant depth of top/bottom corners */
+.green{background:var(--field);color:var(--salt);padding:9rem 0;clip-path:polygon(0 4vw,100% 0,100% calc(100% - 4vw),0 100%)}
+/* Cards (3D tilt vars --rx/--ry are set by script.js on hover) */
+.cards{display:grid;gap:1.25rem;margin-top:2.5rem}
+.card{display:grid;grid-template-columns:1fr 110px;gap:1rem;align-items:center;padding:1.5rem;border-radius:var(--r);background:var(--salt);color:var(--soil);transform:perspective(800px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s,box-shadow .3s}
+.card:hover{box-shadow:0 24px 50px #0004}
+.card p{margin:.4rem 0 1rem;font-size:.95rem}
+.card img{rotate:-4deg;transition:rotate .35s,translate .35s} /* playful tilt, straightens + lifts on hover */
+.card:hover img{rotate:5deg;translate:0 -8px}
+.card.alt{border-radius:64px var(--r) var(--r) var(--r)} /* the quirky "arched" card used for the middle cut */
+.tags{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0 1rem} /* size chips on product cards */
+.tags li{list-style:none;padding:.15rem .7rem;border-radius:99px;background:var(--gold);font-size:.85rem;font-weight:700}
+.soon{display:inline-block;margin-bottom:.4rem;padding:.1rem .7rem;border-radius:99px;background:var(--soil);color:var(--gold);font-size:.8rem;font-weight:700} /* "Coming soon" badge */
+/* Vacuum / normal toggle — translucent white pill sits nicely on the green section */
+.seg{display:inline-flex;margin:1.5rem 0 0;padding:4px;border-radius:99px;background:#fff3}
+.seg button{padding:.6rem 1.2rem;border:0;border-radius:99px;background:none;color:inherit;font:700 .95rem var(--fb);cursor:pointer;transition:background .25s,color .25s}
+.seg button[aria-pressed=true]{background:var(--gold);color:var(--soil)} /* the active packaging option */
+/* Shelf-life line inside product cards — the only text the toggle swaps (data-v/data-n in script.js) */
+.shelf{font-weight:600}
+/* News cards */
+.press{display:grid;gap:1.75rem;margin-top:2rem}
+.press a{display:grid;gap:.8rem;text-decoration:none}
+.press .im{overflow:hidden;border-radius:var(--r)}
+.press img{width:100%;aspect-ratio:4/3;object-fit:cover;transition:transform .6s}
+.press a:hover img{transform:scale(1.07)} /* zoom-on-hover — .6s controls the glide speed */
+.press a:hover h3{color:var(--field)}
+/* Two-column feature rows and photos */
+.split2{display:grid;gap:2rem;align-items:center}
+.photo{border-radius:var(--r);width:100%;aspect-ratio:4/3;object-fit:cover}
+.ph3{display:grid;gap:.75rem;margin-top:2rem} /* 3-up photo strip */
+/* Core values accordion — native <details>, "+" rotates into an "×" when open */
+details{border-top:2px solid var(--soil);padding:1rem 0}
+details:last-child{border-bottom:2px solid var(--soil)}
+summary{cursor:pointer;font:700 1.3rem var(--fd);list-style:none;display:flex;justify-content:space-between}
+summary::after{content:"+";transition:rotate .3s}
+details[open] summary::after{rotate:45deg}
+details p{padding-top:.6rem;max-width:60ch}
+/* CTA band */
+.cta{background:var(--gold);padding:4rem 0;text-align:center}
+.cta h2{margin-bottom:1.5rem}
+/* Contact */
+.cgrid{display:grid;gap:2.5rem}
+address{font-style:normal;font-size:1.1rem;margin:1rem 0}
+address a{font-weight:700}
+form{display:grid;gap:1rem}
+label{display:grid;gap:.35rem;font-weight:600}
+input,textarea{padding:.9rem 1rem;border:2px solid var(--soil);border-radius:14px;background:#fff;color:var(--soil);font:inherit;transition:box-shadow .2s}
+input:focus,textarea:focus{outline:0;box-shadow:0 0 0 4px var(--gold)} /* gold focus halo */
+[aria-invalid=true]{border-color:#8a1c0b} /* invalid field outline — light pages */
+.err{min-height:1.2em;color:#8a1c0b;font-weight:600} /* validation message — light pages */
+.legal{max-width:70ch;padding-top:8rem}.legal h2{margin-bottom:1.5rem}.legal h3{margin:1.5rem 0 .4rem} /* 8rem clears the fixed header */
+
+/* ===== 9. FOOTER ===== */
+footer{background:var(--soil);color:var(--salt);padding:3rem 0 6rem}
+footer a{display:block;color:var(--salt);text-decoration:none;margin:.25rem 0}
+footer a:hover{color:var(--gold)}
+.fgrid{display:grid;gap:2rem}
+.fgrid h3{color:var(--gold);margin-bottom:.5rem;font-size:1.1rem}
+.flogo{height:50px;margin-bottom:.8rem}
+.fbase{display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;margin-top:2rem;padding-top:1.5rem;border-top:1px solid #fbf8ef33;font-size:.9rem}
+.fbase a{display:inline;color:var(--gold);margin-right:.8rem}.fbase span:last-child a{margin:0}
+/* Floating buttons — WhatsApp (green) and back-to-top (dark, appears after 700px of scroll) */
+.fab{position:fixed;right:1rem;z-index:40;width:54px;height:54px;border:0;border-radius:50%;display:grid;place-content:center;font:800 1.4rem var(--fb);cursor:pointer;text-decoration:none;box-shadow:0 8px 20px #0003}
+.wa{bottom:calc(1rem + env(safe-area-inset-bottom,0px));background:#25D366;color:#fff}
+.top{bottom:calc(5rem + env(safe-area-inset-bottom,0px));background:var(--soil);color:var(--salt);opacity:0;pointer-events:none;transition:opacity .3s}
+.top.show{opacity:1;pointer-events:auto}
+
+/* ===== 10. DESKTOP (min 860px) — tablet landscape and up. Keep this value in sync with
+   the 860px check in script.js (menu auto-close) — they must match. ===== */
+@media(min-width:860px){
+  #menu{position:static;flex-direction:row;gap:1.75rem;padding:0;background:none;clip-path:none;visibility:visible} /* menu becomes a plain header row */
+  #menu a{font:600 .95rem var(--fb);color:var(--soil)}
+  #menu a[aria-current]{color:var(--field);text-decoration:underline;text-underline-offset:6px}
+  #burger{display:none}
+  .intro,.split2,.cgrid{grid-template-columns:1fr 1fr;gap:4rem}
+  .cards.three{grid-template-columns:repeat(3,1fr);align-items:start}
+  .cards.four{grid-template-columns:repeat(2,1fr)}
+  .three .card{grid-template-columns:1fr}.three .card img{width:60%;order:-1} /* image on top for the 3-cut cards */
+  .three .card:nth-child(2){margin-top:3rem} /* staggered middle card */
+  .press{grid-template-columns:repeat(3,1fr)}
+  .ph3{grid-template-columns:repeat(3,1fr)}
+  .fgrid{grid-template-columns:1.4fr 1fr 1.4fr}
+}
+/* Respect users who opt out of motion: everything still works, nothing animates */
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Desktop hero layout — the art column gets more room */
+@media(min-width:860px){
+  .hgrid{grid-template-columns:1fr 1fr;align-items:center}
+  .art{min-height:440px}
+  .sunimg{width:min(40vw,520px)}
+  .chips{width:min(22vw,320px)}.pack{width:min(14vw,200px)}
+}
+
+/* MOBILE ONLY (phones + tablets, below the 860px desktop breakpoint) — pairs exactly
+   with the site's @media(min-width:860px) desktop query. Desktop keeps the base value. */
+@media(max-width:859.98px){
+  .chips{bottom:-7rem} /* sink the fries pile into the treeline on small screens */
+}

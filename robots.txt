@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.serenifries.co.ke/sitemap.xml
