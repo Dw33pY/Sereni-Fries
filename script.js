@@ -13,12 +13,11 @@ const G = window.gsap, ST = window.ScrollTrigger, RM = matchMedia('(prefers-redu
 if (G && ST) G.registerPlugin(ST);                       // activate the scroll-animation plugin
 
 /* ---------- 1. CONFIG — the site's three dials. EDIT here. ----------
-   ⚠ MIGRATION WARNING: IMG and the two PDF links in NEWS (section 2) point at the
-   OLD WordPress site. When it shuts down, those files disappear. Download them
-   into /img/ and /pdf/ folders at your site root (checklist provided separately),
-   then change:  IMG → '/img/'   and the NEWS links → '/pdf/...'                    */
+   ⚠ MIGRATION: IMG and the two PDF links in NEWS (section 2) point at the OLD
+   WordPress site. Your copies are downloaded — when ready, flip:
+   IMG → '/img/'   and the NEWS links → '/pdf/...' (short lines, easy edits). */
 const SITE = 'https://www.serenifries.co.ke';   // final domain for canonical URLs — EDIT if the domain ever changes
-const IMG  = 'https://www.serenifries.co.ke/wp-content/uploads/2022/08/'; // image folder — change to '/img/' after downloading
+const IMG  = 'https://www.serenifries.co.ke/wp-content/uploads/2022/08/'; // image folder — flip to '/img/' after verifying local copies
 const WA   = '254725690901';                    // WhatsApp number, no + (the contact form hands off to it)
 
 /* ---------- 2. CONTENT DATA — all page copy. EDIT here. ---------- */
@@ -38,9 +37,8 @@ const FRESH = [
 // Shelf-life text swapped by the vacuum/normal toggle on /products (.v = vacuum, .n = normal)
 const SHELF = { v: 'Vacuum sealed in 10 kg packets. Shelf life: 4 days refrigerated.', n: 'Normal sealed in 10 kg packets. Shelf life: 2 days refrigerated.' };
 // News: [title, image, link]. ⚠ MIGRATION: both PDF links live on the old site —
-// after downloading them into /pdf/, swap the URLs to '/pdf/DN-Sereni.pdf'
-// and '/pdf/World-Potato-Congress.pdf'. The 3rd link duplicates #2 on the old site —
-// replace it with the real article when you find it.
+// swap to '/pdf/DN-Sereni.pdf' and '/pdf/World-Potato-Congress.pdf' when ready.
+// The 3rd link duplicates #2 on the old site — replace with the real article when found.
 const NEWS = [
   ['Ten years on, Sereni Fries continues to add value to Kenya’s potatoes', 'DailyNation.jpg', 'https://serenifries.co.ke/pdf/DN%20-%20Sereni%20(1).pdf'],
   ['The Good Potato Initiative', 'WorldPotatoCongress.jpg', 'https://www.serenifries.co.ke/pdf/World%20Potato%20A0%20Poster.pdf'],
@@ -59,7 +57,9 @@ const VALUES = [
 /* ---------- 3. PAGE TEMPLATES — structure of each page. ---------- */
 // Image helper: file from the IMG folder, alt text, optional CSS class. Lazy-loads by default.
 const img = (f, alt = '', c = '') => `<img class="${c}" src="${IMG}${f}" alt="${alt}" loading="lazy" decoding="async">`;
-// data-r = fade/slide reveal on scroll · data-split = animated headline · data-n = count-up number.
+// data-r = fade/slide reveal on scroll · data-split = animated headline · data-n = count-up
+// number (only ever used inside .stats blocks — the /products shelf lines reuse the
+// attribute name for "normal sealed", which is why the counter is scoped in section 5).
 // Hero used on EVERY page: rays + clouds + the real Sun image (it carries the logo). Chips and
 // pack shots appear on home only. How deep the sun "sets" behind the skyline is the --dip
 // variable in styles.css §7. The Tree/Animals/Ground images from the old site are unused
@@ -105,8 +105,8 @@ const PAGES = {
       <div data-r>${img('Collection-and-Delivery.jpg', 'Collection and delivery', 'photo')}</div><div data-r><h2 data-split>Supply</h2><p class="lead">Our after-sales delivery service is top notch and highly reliable. Our delivery route planning is well thought out so that all our customers are promptly served.</p></div></section>
     <section class="wrap sec"><h2 data-split>Who we supply</h2><div data-r>${img('Clients-Logos.jpg', 'Sereni Fries client logos', 'logos')}</div></section>` + cta },
   // ---- PRODUCTS ----
-  // FIX: each fresh card now shows a permanent description (f[1]) plus the shelf-life line
-  // the toggle swaps — so the section has content before anyone clicks Vacuum/Normal.
+  // Each fresh card shows a permanent description (f[1]) plus the shelf-life line the
+  // toggle swaps (data-v/data-n attributes + .shelf class — untouched by the fix in §5).
   '/products': { t: 'Our products – Sereni Fries', d: 'Frozen chips, Lyonnaise potatoes, wedges, whole peeled potatoes and chips in five sizes for restaurants, supermarkets and hotels.',
     v: () => hero('Our products', 'Fresh and frozen, for restaurants, supermarkets and hotels.') +
     `<section class="wrap sec"><div class="card" data-r><div><span class="soon">Coming soon</span><h3>Frozen chips</h3><p>Our new frozen chips will be in the market soon. Discover the new varieties.</p><a class="btn" href="/products/frozen-fries">See the new varieties</a></div>${img('Pack_Matchstick.png', 'Frozen chips pack')}</div></section>
@@ -160,8 +160,8 @@ function draw(path) {                                              // render one
   ST && ST.getAll().forEach(t => t.kill());                        // old page's scroll animations must not linger
   app.innerHTML = p.v();
   document.title = p.t; $('#md').content = p.d;
-  // FIX: an unknown path renders the 404 page — never advertise that dead URL to
-  // search engines; point the canonical at home instead.
+  // An unknown path renders the 404 page — never advertise that dead URL to search
+  // engines; point the canonical at home instead.
   $('#cn').href = SITE + (PAGES[path] && path !== '/' ? path : '');
   // Highlight the current nav link ("/products/frozen-fries" also lights "Products")
   $$('#menu a').forEach(a => a.toggleAttribute('aria-current', norm(a.getAttribute('href')) === path || (path.startsWith('/products') && a.getAttribute('href') === '/products')));
@@ -182,9 +182,8 @@ async function nav(href, push = true) {                            // animated p
   } finally { busy = false; }                                      // never leave navigation locked
 }
 // Intercept internal links (anything starting with a single "/") — but ONLY real pages.
-// FIX: root-relative file links (e.g. the locally hosted /pdf/ articles after
-// migration) are not pages, so they must fall through to the browser and open
-// normally instead of triggering the 404 route.
+// Root-relative file links (e.g. locally hosted /pdf/ articles) are not pages, so
+// they fall through to the browser and open normally instead of hitting the 404 route.
 document.addEventListener('click', e => {
   const a = e.target.closest('a[href^="/"]');
   if (!a || a.target || e.metaKey || e.ctrlKey || e.shiftKey || a.getAttribute('href').startsWith('//')) return;
@@ -203,14 +202,16 @@ function enhance() {
     const play = () => G.to(q, { yPercent: 0, duration: .9, stagger: .06, ease: 'power4.out' });
     if (el.closest('.hero')) when(play); else ST && ST.create({ trigger: el, start: 'top 90%', once: true, onEnter: play });
   });
-  // Scroll reveal for [data-r] — FIX: guarded so pages without any (legal pages, 404)
-  // don't trigger GSAP "target not found" warnings in the console
+  // Scroll reveal for [data-r] — guarded so pages without any don't log warnings
   if ($('[data-r]')) {
     G.set('[data-r]', { y: 40, opacity: 0 });
     ST && ST.batch('[data-r]', { start: 'top 90%', once: true, onEnter: b => G.to(b, { y: 0, opacity: 1, duration: .8, stagger: .12, overwrite: true, clearProps: 'transform,opacity' }) });
   }
-  // Count-up numbers (safe on pages without any — forEach over an empty list does nothing)
-  $$('[data-n]').forEach(el => { const n = +el.dataset.n, o = { v: 0 }; el.textContent = 0;
+  // Count-up numbers — ★ THE NaN FIX ★ scoped to .stats so it can never grab the
+  // /products shelf lines, whose data-n attribute means "normal sealed". The old
+  // selector [data-n] matched them too: it wiped their text to 0, then animated
+  // it to NaN (counting to a sentence). Pages without stats simply do nothing.
+  $$('.stats [data-n]').forEach(el => { const n = +el.dataset.n, o = { v: 0 }; el.textContent = 0;
     ST && ST.create({ trigger: el, start: 'top 92%', once: true, onEnter: () => G.to(o, { v: n, duration: 1.4, ease: 'power2.out', onUpdate: () => el.textContent = Math.round(o.v).toLocaleString('en-US') }) }); });
   // Hero intro for the paragraph and buttons (headline handled by the split above) —
   // guarded: legal pages have no hero, and animating nothing also logs a warning
@@ -245,9 +246,9 @@ burger.onclick = () => setOpen(!header.classList.contains('open')); // tap burge
 addEventListener('keydown', e => e.key === 'Escape' && setOpen(false)); // Esc always closes
 topBtn.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });   // floating ↑ button
 addEventListener('scroll', () => topBtn.classList.toggle('show', scrollY > 700), { passive: true }); // show ↑ after 700px
-// FIX: with the menu open, rotating the device / resizing past the desktop breakpoint
-// used to leave the page scroll-locked with no visible menu to close. Now the menu
-// auto-closes at ≥860px. This number MUST match the desktop media query in styles.css §10.
+// With the menu open, resizing past the desktop breakpoint used to leave the page
+// scroll-locked with no visible menu — now it auto-closes at ≥860px. This number
+// MUST match the desktop media query in styles.css §10.
 const desk = matchMedia('(min-width:860px)');
 const onGrow = () => { if (desk.matches) setOpen(false); };
 desk.addEventListener ? desk.addEventListener('change', onGrow) : desk.addListener(onGrow); // addListener = old Safari fallback
@@ -268,8 +269,8 @@ document.addEventListener('submit', e => {
   open(`https://wa.me/${WA}?text=` + encodeURIComponent(`Hi Sereni Fries, I'm ${d.name} (${d.email}). ${d.message}`), '_blank', 'noopener'); f.reset();
 });
 
-// Preloader: home page, first visit per session. About 3.8s of "fries rising" + logo
-// reveal + curtain split. Click it to skip. DUR and WORDS are the timing/ copy dials.
+// Preloader: home page, first visit per session. DUR ms of "fries rising" + logo
+// reveal + curtain split. Click it to skip. DUR and WORDS are the timing/copy dials.
 function boot() {
   draw(norm(location.pathname));                                   // render first so content is ready behind the loader
   const L = $('#loader'); let seen = false;
@@ -282,7 +283,7 @@ function boot() {
   addEventListener('load', () => loaded = true); setTimeout(() => loaded = true, 8000); // never wait on a stuck asset longer than 8s
   const pct = $('.pct'), lw = $('.lw'), t0 = performance.now();
   const finish = () => { if (fin) return; fin = true; L.classList.add('fin');                       // logo pops in
-    setTimeout(() => { L.classList.add('done'); setTimeout(() => { L.remove(); start(); }, 900); }, 1500); }; // then the curtain splits
+    setTimeout(() => { L.classList.add('done'); setTimeout(() => { L.remove(); start(); }, 900); }, 1500); }; // then the curtain splits (1500 = logo hold time)
   L.addEventListener('click', finish);                             // click anywhere = skip
   (function tick(t) {                                              // holds at 88% until the page has fully loaded
     if (fin) return;
