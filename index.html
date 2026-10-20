@@ -13,13 +13,13 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Sereni Fries – Best Quality Potato Products">
 <meta property="og:description" content="Frozen and fresh cut fries, processed with care in Kenya for over ten years.">
-<meta property="og:image" content="https://www.serenifries.co.ke/wp-content/uploads/2022/08/Logo.png">
-<link rel="icon" href="https://www.serenifries.co.ke/wp-content/uploads/2020/09/cropped-serenilogo2-270x270.png">
+<meta property="og:image" content="img/Logo.png">
+<link rel="icon" href="img/favicon.png" type="image/png"><!-- 32x32px PNG -->
 <!-- Fonts: Bricolage Grotesque = headings, Figtree = body. If you swap fonts, change them
      here AND in the --fd / --fb tokens at the top of styles.css. -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;600;700&display=swap">
-<!-- Absolute path so nested routes like /products/frozen-fries still find the file -->
+<!-- Absolute path so nested routes like /products still find the file -->
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="loading"><!-- .loading locks scrolling; boot() in script.js removes it when the preloader ends -->
@@ -33,18 +33,20 @@
      KEEP EXACTLY SEVEN <i> FRIES — the CSS expects one fry per ~15% of progress. -->
 <div id="loader" aria-hidden="true">
   <div class="lp l"></div><div class="lp r"></div><!-- the two curtain halves -->
-  <div class="lc"><img class="llogo" src="https://www.serenifries.co.ke/wp-content/uploads/2022/08/Logo.png" alt=""><div class="fries"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b class="pct">0</b><span class="lw">Sourcing from Kenyan farms</span></div>
+  <div class="lc"><img class="llogo" src="img/Logo.png" alt=""><div class="fries"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b class="pct">0</b><span class="lw">Sourcing from Kenyan farms</span></div>
 </div>
 
 <!-- PAGE TRANSITION — gold curtain that wipes up between pages (styled in styles.css §4) -->
-<div id="wipe" aria-hidden="true"><img src="https://www.serenifries.co.ke/wp-content/uploads/2022/08/Logo.png" alt=""></div>
+<div id="wipe" aria-hidden="true"><img src="img/Logo.png" alt=""></div>
 
+<!-- HEADER — original layout: logo LEFT, nav RIGHT. Logo gets a tiny right nudge via .brand padding. -->
 <header>
-  <!-- Brand logo links home; clicking it while already home just scrolls to top -->
-  <a class="brand" href="/" aria-label="Sereni Fries home"><img src="https://www.serenifries.co.ke/wp-content/uploads/2022/08/Logo_SMall.png" alt="Sereni Fries"></a>
-  <!-- NAV LINKS: edit labels/paths here — every path must exist in PAGES in script.js -->
+  <!-- Brand logo — links home; clicking it while already home just scrolls to top -->
+  <a class="brand" href="/" aria-label="Sereni Fries home"><img src="img/Logo.png" alt="Sereni Fries"></a>
+  <!-- NAV LINKS: edit labels/paths here — every path must exist in PAGES in script.js.
+       "Home" is first so visitors don't have to guess that the logo links home. -->
   <nav id="menu" aria-label="Main">
-    <a href="/about">About</a><a href="/products">Products</a><a href="/csr">CSR</a><a href="/news">News</a><a href="/contact">Contact</a>
+    <a href="/">Home</a><a href="/about">About</a><a href="/products">Products</a><a href="/csr">CSR</a><a href="/news">News</a><a href="/contact">Contact</a>
   </nav>
   <!-- Burger only appears on mobile (styles.css §5); opens the circle-reveal menu -->
   <button id="burger" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
@@ -56,17 +58,17 @@
 <footer id="foot">
   <div class="wrap fgrid">
     <!-- Column 1: logo + one-line promise -->
-    <div><img class="flogo" src="https://www.serenifries.co.ke/wp-content/uploads/2022/08/Logo_SMall.png" alt="Sereni Fries"><p>Safe, high quality potato products from Kenyan farms.</p></div>
+    <div><img class="flogo" src="img/Logo_SMall.png" alt="Sereni Fries"><p>Safe, high quality potato products from Kenyan farms.</p></div>
     <!-- Column 2: same links as the header (keep the two in sync when editing) -->
-    <div><h3>Explore</h3><a href="/about">About</a><a href="/products">Products</a><a href="/csr">CSR</a><a href="/news">News</a><a href="/contact">Contact</a></div>
+    <div><h3>Explore</h3><a href="/">Home</a><a href="/about">About</a><a href="/products">Products</a><a href="/csr">CSR</a><a href="/news">News</a><a href="/contact">Contact</a></div>
     <!-- Column 3: address block — EDIT contact details here AND in the /contact page in script.js -->
     <div><h3>Visit</h3><address>Athi Business Park, 3<br>Old Msa Road, Mlolongo<br>P.O. Box 18108-00100, Nairobi<br><a href="mailto:info@serenifries.co.ke">info@serenifries.co.ke</a><br><a href="tel:+254725690901">+254 725 690 901</a></address></div>
   </div>
   <div class="wrap fbase">
     <span>© 2026 Sereni Fries</span><!-- EDIT the year each January -->
     <span><a href="/privacy">Privacy</a> <a href="/terms">Terms</a> <a href="https://www.facebook.com/profile.php?id=100063839022226" target="_blank" rel="noopener noreferrer">Facebook</a></span>
-    <!-- Required footer credit — tagline ties the product language ("cuts") to the craft. Keep the Dw33pY link. -->
-    <span>Hand-cut, fried golden &amp; made by <a href="https://dw33py.netlify.app" target="_blank" rel="noopener noreferrer">Dw33pY</a></span>
+    <!-- Footer credit — updated wording per request. Dw33pY is linked; add Dira Digital's URL when known. -->
+    <span>Hand-cut, fried golden &amp; made by Dira Digital x <a href="https://dw33py.netlify.app" target="_blank" rel="noopener noreferrer">Dw33pY</a></span>
   </div>
 </footer>
 

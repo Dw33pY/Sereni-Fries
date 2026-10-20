@@ -17,7 +17,7 @@ if (G && ST) G.registerPlugin(ST);                       // activate the scroll-
    WordPress site. Your copies are downloaded — when ready, flip:
    IMG → '/img/'   and the NEWS links → '/pdf/...' (short lines, easy edits). */
 const SITE = 'https://www.serenifries.co.ke';   // final domain for canonical URLs — EDIT if the domain ever changes
-const IMG  = 'https://www.serenifries.co.ke/wp-content/uploads/2022/08/'; // image folder — flip to '/img/' after verifying local copies
+const IMG  = '/img/'; // image folder — flip to '/img/' after verifying local copies
 const WA   = '254725690901';                    // WhatsApp number, no + (the contact form hands off to it)
 
 /* ---------- 2. CONTENT DATA — all page copy. EDIT here. ---------- */
@@ -53,6 +53,24 @@ const VALUES = [
   ['Diversity and Inclusivity', 'Regardless of who we are, where we come from, our roles in the company, we all play a vital role towards the company’s success and there is space for everyone.'],
   ['Learning and continual improvement', 'Every day presents a chance for self-amelioration, for our staff and company at large. We endeavor to sustainably grow ourselves by upholding a wholesome continuous learning and improvement.'],
   ['Local collaboration', '“Buy Kenya Build Kenya”. We hold our local potato farmers close to our hearts and create rapport with other stakeholders that are key in our processing and selling quality, safe potato products.']];
+// CLIENT LOGOS — 13 files in the /clients/ folder. Filenames must match EXACTLY.
+// NOTE: "Java House.png" and "Mercury Lounge.png" have spaces — keep them. The browser will auto-encode them.
+// EDIT: add/remove entries here to match what's actually in your /clients/ folder.
+const CLIENTS = [
+  'Chicken-inn.png',
+  'chicking-seeklogo.png',
+  'Churrasco-Gaucho.png',
+  'Eastmatt.png',
+  'Fogo.png',
+  'Galitos.gif',
+  'Java House.png',
+  'Mambo-Italia.png',
+  'Mercury Lounge.png',
+  'Mulleys.png',
+  'naivas-supermarket-seeklogo.png',
+  'quickmark-supermarket-seeklogo.png',
+  'Tuskys.png'
+];
 
 /* ---------- 3. PAGE TEMPLATES — structure of each page. ---------- */
 // Image helper: file from the IMG folder, alt text, optional CSS class. Lazy-loads by default.
@@ -69,10 +87,10 @@ const hero = (h, p, home) => `<section class="hero${home ? ' home' : ''}" data-h
   <div class="art"><div class="sunw"><img class="sunimg" src="${IMG}Sun_SlideSHow.png" alt="Sereni Fries" fetchpriority="high"></div>${home ? `<img class="chips" src="${IMG}Chips_SlideSHow.png" alt="Golden fries"><img class="pack" src="${IMG}Pack_medium2.png" alt="Sereni Fries medium cut pack">` : ''}</div></div>${sk()}</section>`;
 // Savanna silhouette divider (bottom of every hero and some pages) — recoloured to --soil in CSS
 const sk = (c = '') => `<div class="sk ${c}" aria-hidden="true"><img src="${IMG}SkylineSavana_Divider.png" alt="" decoding="async"></div>`;
-// The three frozen cut cards (home + /products/frozen-fries). Middle card gets the arched .alt style
+// The three frozen cut cards (home + /products). Middle card gets the arched .alt style
 const cuts = () => CUTS.map((c, i) => `<article class="card${i == 1 ? ' alt' : ''}" data-r><div><h3>${c[0]}</h3><p>${c[1]}</p><a class="btn" href="/contact">Order this cut</a></div>${img(c[2], c[0] + ' pack')}</article>`).join('');
-// News grid: image, title, opens the article PDF in a new tab
-const press = () => `<div class="press">${NEWS.map(n => `<a href="${n[2]}" target="_blank" rel="noopener noreferrer" data-r><div class="im">${img(n[1])}</div><h3>${n[0]}</h3></a>`).join('')}</div>`;
+// News grid: image, title, "Read more →" link — opens the article PDF in a new tab
+const press = () => `<div class="press">${NEWS.map(n => `<a href="${n[2]}" target="_blank" rel="noopener noreferrer" data-r><div class="im">${img(n[1])}</div><h3>${n[0]}</h3><span class="read-more">Read more →</span></a>`).join('')}</div>`;
 // Gold call-to-action band + divider, reused at the end of most pages
 const cta = `<section class="cta"><div class="wrap"><h2 data-split>Ready to stock Sereni Fries?</h2><a class="btn" href="/contact">Get in touch</a></div></section>${sk('gold')}`;
 // Product marquee words — EDIT the list, the belt repeats it seamlessly
@@ -90,7 +108,11 @@ const PAGES = {
       <a class="btn" href="/about">Our story</a><a class="btn ghost" href="/products">See products</a>${img('ProductOfKenya_S2.jpg', 'Product of Kenya', 'badge')}</div></section>
     <div class="belt" aria-hidden="true"><div class="mq">${mq}${mq}${mq}${mq}</div></div>
     <section class="green"><div class="wrap"><h2 data-split>Three cuts, one standard of care.</h2><div class="cards three">${cuts()}</div></div></section>
-    <section class="wrap sec"><h2 data-split>In the news</h2>${press()}</section>` + cta },
+    <section class="wrap sec"><h2 data-split>Clients &amp; news</h2>
+      <div class="news-split" data-r>
+        <div class="news-clients"><h2>Who we supply</h2><div class="clients">${CLIENTS.map(c => `<a href="#" onclick="return false" aria-label="${c.replace(/\.[a-z]+$/,'').replace(/[-_]/g,' ')}"><img src="/clients/${encodeURIComponent(c)}" alt="${c.replace(/\.[a-z]+$/,'').replace(/[-_]/g,' ')}" loading="lazy" decoding="async"></a>`).join('')}</div></div>
+        <div class="news-latest"><h2>Latest news</h2>${press()}<a class="btn ghost" href="/news" style="justify-self:start">See all news →</a></div>
+      </div></section>` + cta },
   // ---- ABOUT ----
   '/about': { t: 'About us – Sereni Fries', d: 'Our story, mission, vision, core values, production and supply at Sereni Fries, Kenya’s potato processing pioneer.',
     v: () => hero('About us', 'Over ten years of care in every batch.') +
@@ -102,21 +124,23 @@ const PAGES = {
       <div data-r>${img('SF-Factory.jpg', 'Sereni Fries factory', 'photo')}</div></div></section>
     <section class="wrap sec"><h2 data-split>Our core values</h2><div data-r>${VALUES.map(v => `<details name="values"><summary>${v[0]}</summary><p>${v[1]}</p></details>`).join('')}</div></section>
     <section class="wrap sec split2"><div data-r><h2 data-split>Our production</h2><p class="lead">It all starts with farm grown potatoes, produced under good agricultural practices, that are perfectly processed by our committed team for a delightful meal. Our potato products are lovingly prepared in sizeable batches to ensure that only the best is supplied to our customers.</p></div><div data-r>${img('Production-line-3.jpg', 'Production line', 'photo')}</div>
-      <div data-r>${img('Collection-and-Delivery.jpg', 'Collection and delivery', 'photo')}</div><div data-r><h2 data-split>Supply</h2><p class="lead">Our after-sales delivery service is top notch and highly reliable. Our delivery route planning is well thought out so that all our customers are promptly served.</p></div></section>
-    <section class="wrap sec"><h2 data-split>Who we supply</h2><div data-r>${img('Clients-Logos.jpg', 'Sereni Fries client logos', 'logos')}</div></section>` + cta },
-  // ---- PRODUCTS ----
-  // Each fresh card shows a permanent description (f[1]) plus the shelf-life line the
-  // toggle swaps (data-v/data-n attributes + .shelf class — untouched by the fix in §5).
+      <div data-r>${img('Collection-and-Delivery.jpg', 'Collection and delivery', 'photo')}</div><div data-r><h2 data-split>Supply</h2><p class="lead">Our after-sales delivery service is top notch and highly reliable. Our delivery route planning is well thought out so that all our customers are promptly served.</p></div></section>` + cta },
+  // ---- PRODUCTS (frozen fries merged in — no separate page) ----
+  // The frozen cuts and cooking guide now live here so visitors see everything in one place.
   '/products': { t: 'Our products – Sereni Fries', d: 'Frozen chips, Lyonnaise potatoes, wedges, whole peeled potatoes and chips in five sizes for restaurants, supermarkets and hotels.',
     v: () => hero('Our products', 'Fresh and frozen, for restaurants, supermarkets and hotels.') +
-    `<section class="wrap sec"><div class="card" data-r><div><span class="soon">Coming soon</span><h3>Frozen chips</h3><p>Our new frozen chips will be in the market soon. Discover the new varieties.</p><a class="btn" href="/products/frozen-fries">See the new varieties</a></div>${img('Pack_Matchstick.png', 'Frozen chips pack')}</div></section>
+    // --- Frozen chips section (merged from /products/frozen-fries) ---
+    `<section class="wrap sec"><h2 data-split>New frozen chips — coming soon</h2><p class="lead" data-r>Our new frozen chips will be in the market soon. Discover the three new cuts below.</p></section>
+    <section class="green"><div class="wrap"><div class="cards three">${cuts()}</div></div></section>
+    <section class="wrap sec"><h2 data-split>How to cook</h2><p class="lead" data-r>Cooking guides below.</p><div class="ph3" data-r>${img('HowToKook_TXT2b.png', 'How to cook, option 1')}${img('HowToKook_TXT2b2.png', 'How to cook, option 2')}</div></section>
+    <!-- Fresh products section -->
     <section class="green"><div class="wrap"><h2 data-split>For restaurants, supermarkets and hotels</h2>
       <div class="seg" role="group" aria-label="Packaging"><button data-m="v" aria-pressed="true">Vacuum sealed</button><button data-m="n" aria-pressed="false">Normal sealed</button></div>
       <div class="cards four">${FRESH.map(f => `<article class="card" data-r><div><h3>${f[0]}</h3><p>${f[1]}</p><p class="shelf" data-v="${SHELF.v}" data-n="${SHELF.n}">${SHELF.v}</p>${f[3] ? `<ul class="tags" aria-label="Sizes in mm">${f[3].map(s => `<li>${s} mm</li>`).join('')}</ul>` : ''}<a class="btn" href="/contact">Request a quote</a></div>${img(f[2], f[0])}</article>`).join('')}</div></div></section>` + cta },
-  '/products/frozen-fries': { t: 'New frozen fries – Sereni Fries', d: 'Matchstick, medium and standard cut frozen fries from Sereni Fries, with cooking guidance.',
-    v: () => hero('New frozen fries', 'Three cuts, ready for your fryer.') + `<section class="wrap sec"><p class="lead" data-r>Our new frozen chips will be in the market soon. Discover the three new cuts below.</p></section>` +
-    `<section class="green"><div class="wrap"><div class="cards three">${cuts()}</div></div></section>
-    <section class="wrap sec"><h2 data-split>How to cook</h2><p class="lead">Cooking guides below. EDIT: these are the original images; retype the steps as text so they are searchable.</p><div class="ph3" data-r>${img('HowToKook_TXT2b.png', 'How to cook, option 1')}${img('HowToKook_TXT2b2.png', 'How to cook, option 2')}</div></section>` + cta },
+  // ---- /products/frozen-fries is now a redirect to /products (see vercel.json) ----
+  // It stays in PAGES only so internal links don't 404 — it instantly forwards.
+  '/products/frozen-fries': { t: 'Our products – Sereni Fries', d: 'Frozen chips, Lyonnaise potatoes, wedges, whole peeled potatoes and chips in five sizes.',
+    v: () => PAGES['/products'].v() },
   // ---- CSR ----
   '/csr': { t: 'CSR – Sereni Fries', d: 'How Sereni trains and contracts small holder potato farmers in Kenya through climate smart agriculture and good agricultural practices.',
     v: () => hero('Corporate social responsibility', 'Growing with Kenya’s potato farmers.') +
@@ -127,15 +151,15 @@ const PAGES = {
     <section class="wrap sec"><div class="ph3" data-r>${img('Farmers-Harvesting-2.jpeg', 'Farmers harvesting', 'photo')}${img('Aggregation.jpeg', 'Aggregation', 'photo')}${img('Harvest-Aggregation.jpeg', 'Harvest', 'photo')}</div></section>` + cta },
   // ---- NEWS ----
   '/news': { t: 'News – Sereni Fries', d: 'Press coverage and updates from Sereni Fries.', v: () => hero('News', 'Coverage and updates.') + `<section class="wrap sec">${press()}</section>${sk()}` },
-  // ---- CONTACT ----
+  // ---- CONTACT (tightened — .contact-sec reduces vertical padding) ----
   '/contact': { t: 'Contact – Sereni Fries', d: 'Contact Sereni Fries at Athi Business Park, Mlolongo, Nairobi. Call +254 725 690 901 or email info@serenifries.co.ke.',
     v: () => hero('Contact us', 'Orders, quotes and supply enquiries.') +
-    `<section class="wrap sec cgrid"><div data-r><h2 data-split>Let’s talk fries.</h2>
+    `<section class="wrap contact-sec cgrid"><div data-r><h2 data-split>Let’s talk fries.</h2>
       <address>Athi Business Park, 3<br>Old Msa Road, Mlolongo<br>P.O. Box 18108-00100, Nairobi, Kenya<br><br><a href="mailto:info@serenifries.co.ke">info@serenifries.co.ke</a><br><a href="tel:+254725690901">+254 725 690 901</a></address>
       <p>Branches: Naivasha, Nakuru and Mombasa.</p><p><a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=Athi+Business+Park+Mlolongo" target="_blank" rel="noopener noreferrer">Open in Maps</a></p></div>
       <form id="cf" novalidate data-r><label>Name<input name="name" autocomplete="name" required maxlength="80"><small class="err"></small></label>
       <label>Email<input name="email" type="email" autocomplete="email" required maxlength="120"><small class="err"></small></label>
-      <label>Message<textarea name="message" rows="5" required maxlength="800"></textarea><small class="err"></small></label>
+      <label>Message<textarea name="message" rows="4" required maxlength="800"></textarea><small class="err"></small></label>
       <button class="btn" type="submit">Send on WhatsApp</button></form></section>${sk()}` },
   // ---- LEGAL (placeholder text: EDIT and have it reviewed before launch) ----
   '/privacy': { t: 'Privacy policy – Sereni Fries', d: 'How Sereni Fries handles your information.', v: () => legal('Privacy policy',
@@ -150,6 +174,10 @@ const PAGES = {
 const app = $('#app'), wipe = $('#wipe');
 let rt; const refresh = () => { clearTimeout(rt); rt = setTimeout(() => ST && ST.refresh(), 150); };
 app.addEventListener('load', refresh, true);                       // lazy images change layout, so re-measure scroll triggers
+// INSTANT RESPONSIVENESS: refresh ScrollTrigger on resize (debounced 150ms) so
+// scroll-reveal positions stay correct when the viewport changes.
+addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => ST && ST.refresh(), 150); }, { passive: true });
+
 let ready = false, busy = false; const queue = [];                 // queue = animations waiting for the preloader to finish
 const when = f => ready ? f() : queue.push(f);
 const norm = p => (p.replace(/\/+$/, '').replace(/\/index\.html$/, '') || '/');   // also maps /index.html to /
@@ -163,20 +191,28 @@ function draw(path) {                                              // render one
   // An unknown path renders the 404 page — never advertise that dead URL to search
   // engines; point the canonical at home instead.
   $('#cn').href = SITE + (PAGES[path] && path !== '/' ? path : '');
-  // Highlight the current nav link ("/products/frozen-fries" also lights "Products")
-  $$('#menu a').forEach(a => a.toggleAttribute('aria-current', norm(a.getAttribute('href')) === path || (path.startsWith('/products') && a.getAttribute('href') === '/products')));
+  // Highlight the current nav link. "/products/frozen-fries" lights "Products" too
+  // (it forwards to /products, so we treat it as part of Products).
+  $$('#menu a').forEach(a => {
+    const href = a.getAttribute('href');
+    const active = norm(href) === path || (path.startsWith('/products') && href === '/products');
+    a.toggleAttribute('aria-current', active);
+  });
   setOpen(false); enhance(); app.focus({ preventScroll: true });   // focus <main> so keyboard users land in the new content
 }
 async function nav(href, push = true) {                            // animated page change
   const path = norm(new URL(href, location.origin).pathname);
   if (busy) return;                                                // a transition is already running — ignore
-  if (push && path === norm(location.pathname)) return scrollTo({ top: 0, behavior: 'smooth' }); // same page = scroll to top
+  // If someone clicks the /products/frozen-fries link, silently go to /products instead
+  // (the frozen fries content is now merged into the products page).
+  const target = path === '/products/frozen-fries' ? '/products' : path;
+  if (push && target === norm(location.pathname)) return scrollTo({ top: 0, behavior: 'smooth' }); // same page = scroll to top
   busy = true;
   try {
     const fx = anim();
     if (fx) { G.set(wipe, { yPercent: 100, visibility: 'visible' }); await G.to(wipe, { yPercent: 0, duration: .5, ease: 'power3.inOut' }); } // curtain down
-    if (push) history.pushState({}, '', path);
-    draw(path);
+    if (push) history.pushState({}, '', target);                  // push the clean URL (/products, not /products/frozen-fries)
+    draw(target);
     scrollTo({ top: 0, behavior: 'instant' });                     // instant: smooth scrolling here would animate under the curtain
     if (fx) { await G.to(wipe, { yPercent: -100, duration: .5, ease: 'power3.inOut' }); G.set(wipe, { visibility: 'hidden' }); } // curtain up
   } finally { busy = false; }                                      // never leave navigation locked
@@ -207,10 +243,8 @@ function enhance() {
     G.set('[data-r]', { y: 40, opacity: 0 });
     ST && ST.batch('[data-r]', { start: 'top 90%', once: true, onEnter: b => G.to(b, { y: 0, opacity: 1, duration: .8, stagger: .12, overwrite: true, clearProps: 'transform,opacity' }) });
   }
-  // Count-up numbers — ★ THE NaN FIX ★ scoped to .stats so it can never grab the
-  // /products shelf lines, whose data-n attribute means "normal sealed". The old
-  // selector [data-n] matched them too: it wiped their text to 0, then animated
-  // it to NaN (counting to a sentence). Pages without stats simply do nothing.
+  // Count-up numbers — scoped to .stats so it can never grab the /products shelf lines,
+  // whose data-n attribute means "normal sealed". Pages without stats simply do nothing.
   $$('.stats [data-n]').forEach(el => { const n = +el.dataset.n, o = { v: 0 }; el.textContent = 0;
     ST && ST.create({ trigger: el, start: 'top 92%', once: true, onEnter: () => G.to(o, { v: n, duration: 1.4, ease: 'power2.out', onUpdate: () => el.textContent = Math.round(o.v).toLocaleString('en-US') }) }); });
   // Hero intro for the paragraph and buttons (headline handled by the split above) —

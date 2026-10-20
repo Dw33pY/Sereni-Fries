@@ -1,7 +1,7 @@
 /* ==========================================================================
-   SERENI FRIES – styles.css
+   SERENI FRIES – styles.css  (v3 — reliable hero pinning + color flow)
    Sections: 1 Tokens · 2 Base · 3 Preloader · 4 Page wipe · 5 Header/Menu
-             6 Buttons · 7 Hero · 8 Shared blocks · 9 Footer · 10 Desktop
+             6 Buttons · 7 Hero · 8 Shared blocks · 9 Footer · 10 Responsive
    Anything marked EDIT is safe to tweak without breaking layout.
    ========================================================================== */
 
@@ -20,7 +20,7 @@
 
 /* ===== 2. BASE ===== */
 *{box-sizing:border-box;margin:0}
-html{scroll-behavior:smooth;scroll-padding-top:76px} /* 76px ≈ header height, keeps jumps clear of it */
+html{scroll-behavior:smooth;scroll-padding-top:76px;overflow-x:clip} /* 76px ≈ header height; clip kills horizontal scroll from rotated marquee + full-bleed soil band */
 body{font:400 1rem/1.65 var(--fb);color:var(--soil);background:var(--salt);overflow-x:hidden}
 body.loading{overflow:hidden} /* scroll lock while the preloader runs — removed by boot() in script.js */
 img{max-width:100%;display:block}
@@ -81,20 +81,20 @@ h3{font-size:1.4rem;font-weight:700}
 #wipe{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:var(--gold);visibility:hidden;pointer-events:none}
 #wipe img{width:140px} /* logo shown on the curtain mid-transition */
 
-/* ===== 5. HEADER + MOBILE MENU (circle reveal from the burger) ===== */
-header{position:fixed;inset:0 0 auto;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:.6rem 1.25rem;padding-top:calc(.6rem + env(safe-area-inset-top,0px));} /* safe-area keeps clear of notches */
+/* ===== 5. HEADER + MOBILE MENU =====
+   HTML order: <brand> <nav> <burger>. Brand sits left, nav links sit right on desktop. */
+header{position:fixed;inset:0 0 auto;z-index:50;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.6rem 1.25rem;padding-top:calc(.6rem + env(safe-area-inset-top,0px))} /* safe-area keeps clear of notches */
 header::before{content:"";position:absolute;inset:0;z-index:-1;background:#fbf8efd9;backdrop-filter:blur(12px)} /* frosted bar */
-.brand,#burger{position:relative;z-index:1} /* stay clickable above the open menu */
+.brand{display:flex;align-items:center;margin-left:3rem} /* EDIT 1.5rem to nudge the logo further right (more padding) or less (closer to nav) */
+#burger{position:relative;z-index:1} /* stays clickable above the open menu */
 .brand img{height:42px;transition:opacity .3s}
-.open .brand img{opacity:0} /* logo hides while the fullscreen menu is open (it reappears on the menu itself via the finish state) */
-/* Mobile menu. FIX: "visibility 0s .7s" keeps it VISIBLE while the circle closes, then hides —
-   previously it vanished instantly, so the closing animation was never seen. The .open rule
-   below switches visibility with no delay so opening still feels instant. */
+.open .brand img{opacity:0} /* logo hides while the fullscreen menu is open */
+/* Mobile menu. "visibility 0s .7s" keeps it VISIBLE while the circle closes, then hides. */
 #menu{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;gap:.4rem;padding:2rem 1.5rem;background:var(--soil);clip-path:circle(0 at calc(100% - 40px) 40px);visibility:hidden;transition:clip-path .7s var(--ease),visibility 0s .7s var(--ease)}
 .open #menu{clip-path:circle(160% at calc(100% - 40px) 40px);visibility:visible;transition:clip-path .7s var(--ease)}
 #menu a{font:800 clamp(2rem,9vw,3rem)/1.2 var(--fd);color:var(--salt);text-decoration:none}
 #menu a[aria-current]{color:var(--gold)} /* the page you're on */
-#burger{width:44px;height:44px;border:0;border-radius:50%;background:var(--gold);cursor:pointer;display:grid;place-content:center;gap:6px}
+#burger{width:44px;height:44px;border:0;border-radius:50%;background:var(--gold);cursor:pointer;display:grid;place-content:center;gap:6px;flex:none} /* flex:none = burger never shrinks */
 #burger span{width:20px;height:2px;background:var(--soil);transition:transform .4s} /* morphs into an X when open */
 .open #burger span:first-child{transform:translateY(4px) rotate(45deg)}
 .open #burger span:last-child{transform:translateY(-4px) rotate(-45deg)}
@@ -105,36 +105,59 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:#fbf8e
 .btn.ghost{background:none;color:var(--soil)}.btn.ghost:hover{color:var(--salt)} /* outline style — swaps to filled on hover */
 .btn.gold{background:var(--gold);border-color:var(--gold);color:var(--soil)}.btn.gold:hover{background:var(--salt);border-color:var(--salt)}
 
-/* ===== 7. HERO — animated scene: rotating rays, drifting clouds, floating sun, pointer parallax ===== */
-.hero{position:relative;overflow:hidden;display:flex;flex-direction:column;padding-top:6.5rem;background:linear-gradient(#FFD966,#FFF1BF)} /* warm sky — EDIT the two hexes to change the sky */
+/* ===== 7. HERO — RELIABLE PINNING v3 =====
+   The sun / chips / pack are pinned to the treeline on EVERY screen size.
+   HOW IT WORKS:
+     1. .hero is a flex-column (min-height 100svh on home, 70svh elsewhere).
+     2. .wrap.hgrid has flex:1 → fills ALL space between the header and the skyline.
+     3. .hgrid's grid rows fill its height (1fr on desktop, auto+1fr on mobile).
+     4. .art stretches to fill its grid cell (default align-self:stretch).
+     5. .art's bottom edge = .hgrid's bottom edge = .sk top = THE TREELINE.
+     6. --dip and bottom values are FIXED rem — no vw clamps, no breakpoint overrides.
+   This means the sun/chips/pack sit at the exact same depth on phones, tablets and desktops. */
+.hero{position:relative;overflow:hidden;display:flex;flex-direction:column;padding-top:6.5rem;min-height:70svh;background:linear-gradient(#FFD966,#FFF1BF)} /* warm sky — EDIT the two hexes to change the sky */
 .hero.home{min-height:100svh} /* only the home hero is full viewport height */
 .rays{position:absolute;left:50%;top:45%;width:170vmax;aspect-ratio:1;translate:-50% -50%;background:repeating-conic-gradient(#fff5 0 6deg,transparent 6deg 12deg);mask-image:radial-gradient(circle,#000,transparent 55%);animation:spin 120s linear infinite;pointer-events:none} /* sunburst — 120s = one rotation (higher = slower) */
 @keyframes spin{to{rotate:360deg}}
 .cloud{position:absolute;left:0;width:120px;height:36px;border-radius:99px;background:#fff9;animation:drift 50s linear infinite;pointer-events:none} /* one cloud crossing — 50s per crossing (higher = slower) */
 .cloud.c1{top:16%}.cloud.c2{top:30%;scale:.7;animation-duration:70s;animation-delay:-30s}.cloud.c3{top:8%;scale:1.3;animation-duration:90s;animation-delay:-60s}
 @keyframes drift{from{translate:-25vw 0}to{translate:110vw 0}}
-.hgrid{position:relative;z-index:2;display:grid;gap:1rem;margin-block:auto} /* auto margins centre the hero content vertically */
+/* .hgrid fills the hero vertically (flex:1) so .art's bottom = treeline. No margin:auto (that centred it and left slack). */
+.hgrid{position:relative;z-index:2;display:grid;gap:1rem;flex:1;margin-block:0;align-items:stretch}
+.ht{align-self:center;padding:1rem 0 0} /* text column centres vertically in its tall cell — the art column stretches instead */
 .ht h1{font-size:clamp(2.4rem,9vw,5.2rem);font-weight:800}
 .ht p{max-width:34ch;margin:1rem 0 1.5rem;font-size:1.15rem}
 /* Art: children rise in once, then follow the pointer. JS only sets --mx/--my (-0.5..0.5);
    --k below = how far each layer drifts (higher = more parallax). EDIT per layer. */
-.art{position:relative;display:grid;place-items:end center;min-height:260px;--dip:clamp(7rem,10vw,9rem)}
-/* --dip = how far the sun SINKS BEHIND the savanna silhouette. Increase = lower sun,
-   decrease = higher sun. The skyline divider (.sk) paints over it, so it can never
-   poke through — it just sets deeper behind the trees. */
-.hero.home .art{--dip:clamp(8rem,14vw,14rem)} /* home hero is full-height and centred, so it needs a deeper dip */
+.art{position:relative;display:grid;place-items:end center;min-height:180px;align-self:stretch;--dip:6rem} /* --dip = how far the sun SINKS BEHIND the treeline (fixed rem — identical on every device) */
+.hero.home .art{--dip:7rem} /* home hero uses a slightly deeper dip */
 .art>*{transform:translate(calc(var(--mx,0)*var(--k,20)*-1px),calc(var(--my,0)*var(--k,20)*-.6px));transition:transform .5s ease-out;animation:rise 1.1s var(--ease) both paused}
 body:not(.loading) .art>*{animation-play-state:running} /* rise waits for the preloader to finish */
 @keyframes rise{from{opacity:0;translate:0 70px}}
-.sunw{--k:18;margin-bottom:calc(var(--dip)*-1)} /* the negative margin dips the sun behind the treeline */
-.sunimg{width:min(80vw,460px);height:auto;animation:float 7s ease-in-out infinite} /* 7s bob speed — higher = calmer */
-@keyframes float{50%{translate:0 -14px}} /* how far the sun floats up mid-cycle */
+.sunw{--k:18;margin-bottom:calc(var(--dip)*-1)} /* negative margin dips the sun below .art's bottom edge (into the treeline) — the .sk divider paints over it */
+/* ===== SUN SIZE & POSITION =====
+   • To make the sun BIGGER: increase the second value, e.g. min(92vw,700px).
+   • To make it SMALLER: decrease the second value, e.g. min(92vw,400px).
+   • To make it WIDER on mobile: increase the first value, e.g. min(100vw,600px).
+   • The "float" animation below bobs it up and down — change the 7s to slow/speed it, and the -14px to bob higher/lower. */
+.sunimg{width:min(92vw,1200px);height:auto;animation:float 7s ease-in-out infinite} /* 7s bob speed — higher = calmer */
+@keyframes float{50%{translate:0 -14px}} /* how far the sun floats up mid-cycle — bigger number = higher bob */
+/* ===== CHIPS (FRIES PILE) SIZE & POSITION =====
+   • SIZE: edit the two values — e.g. min(60vw,500px) makes them bigger.
+   • HORIZONTAL POSITION: change "right:0" to "right:2rem" (move inward) or "left:0;right:auto" (flip to the left side).
+   • VERTICAL DEPTH: edit "bottom:-3rem" — more negative (e.g. -5rem) = sunk deeper into the treeline.
+     Positive (e.g. bottom:1rem) = sitting above the treeline. bottom:0 = exactly on the treeline. */
 .chips,.pack{position:absolute;height:auto}
-.chips{--k:44;right:0;bottom:-12rem;width:min(42vw,300px)} /* the fries pile — home page only */
-.pack{--k:60;left:0;bottom:0;width:min(26vw,180px);rotate:-6deg} /* the pack shot — home page only */
+.chips{--k:44;right:0rem;bottom:0rem;width:min(20vw,300px)} /* the fries pile — home page only */
+/* ===== PACK (PACK SHOT) SIZE & POSITION =====
+   • SIZE: edit the two values — e.g. min(40vw,320px) makes it bigger.
+   • HORIZONTAL POSITION: change "left:0" to push it inward.
+   • VERTICAL DEPTH: edit "bottom:0" — same logic as .chips above.
+   • TILT: edit "rotate(-6deg)" — positive = tilt right, more negative = tilt more left. 0deg = upright. */
+.pack{--k:60;left:0rem;bottom:0rem;width:min(32vw,300px);rotate:-12deg} /* the pack shot — home page only */
 /* Savanna silhouette divider. The PNG's alpha is recoloured to --soil with a drop-shadow
-   trick, so the original image colour doesn't matter. */
-.sk{position:relative;z-index:3;overflow:hidden;line-height:0;margin-top:-1px} /* z-index 3 = skyline paints OVER the dipping sun */
+   trick, so the original image colour doesn't matter. z-index:3 = paints OVER the dipping sun. */
+.sk{position:relative;z-index:3;overflow:hidden;line-height:0;margin-top:-1px;flex:none} /* flex:none = skyline never shrinks */
 .sk img{width:100%;height:auto;translate:-100vw 0;filter:drop-shadow(100vw 0 0 var(--soil))}
 .sk.gold{background:var(--gold)} /* variant used after gold CTA sections */
 /* The first section after every hero sits on the soil band, so the silhouette flows into it */
@@ -147,6 +170,7 @@ body:not(.loading) .art>*{animation-play-state:running} /* rise waits for the pr
 .hero + section .btn.ghost:hover{background:var(--salt);color:var(--soil)}
 .hero + section .card .btn{background:var(--soil);border-color:var(--soil);color:var(--salt)}
 .hero + section .press a:hover h3{color:var(--gold)}
+.hero + section .news-clients h2,.hero + section .news-latest h2{color:var(--gold)}
 .hero + section .err{color:#ffb4a6}
 .hero + section [aria-invalid=true]{border-color:#ffb4a6}
 .logos{width:100%;height:auto;border-radius:var(--r);background:#fff} /* client logos: natural ratio, never cropped */
@@ -155,29 +179,35 @@ body:not(.loading) .art>*{animation-play-state:running} /* rise waits for the pr
 /* ===== 8. SHARED BLOCKS ===== */
 .intro{display:grid;gap:2rem}
 .intro p,.lead{font-size:1.2rem;max-width:56ch;margin-bottom:1.2rem}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.5rem 0 2rem} /* 3 stat columns at every size */
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin:1.5rem 0 2rem} /* 3 stat columns — minmax(0,1fr) so they shrink, never overflow */
 .stats b{display:block;font:800 clamp(2.2rem,9vw,3.8rem)/1 var(--fd);color:var(--field)}
 .stats span{display:block;font-size:.9rem;line-height:1.3}
-/* Scrolling product marquee — 28s per loop (lower = faster, higher = slower). -1.5deg = the tilt. */
-.belt{overflow:hidden;background:var(--gold);padding:1rem 0;transform:rotate(-1.5deg);margin:2rem -2%}
+/* Scrolling product marquee — 28s per loop (lower = faster, higher = slower).
+   NO rotation (was creating triangular cream gaps at the corners).
+   margin:0 + width:100% so the band touches the sections above and below with no cream. */
+.belt{overflow:hidden;background:var(--gold);padding:1.5rem 0;margin:0;width:100%}
 .mq{display:flex;width:max-content;animation:mq 28s linear infinite}
 .mq span{padding-right:2.5rem;font:800 clamp(1.6rem,5vw,2.6rem) var(--fd);white-space:nowrap}
 @keyframes mq{to{transform:translateX(-50%)}}
-/* Green slanted section — the 4vw values are the slant depth of top/bottom corners */
-.green{background:var(--field);color:var(--salt);padding:9rem 0;clip-path:polygon(0 4vw,100% 0,100% calc(100% - 4vw),0 100%)}
-/* Cards (3D tilt vars --rx/--ry are set by script.js on hover) */
+/* Green section — NO clip-path (the slant was slicing off corners and showing cream through the gap).
+   Flat rectangle, full width, sits flush against neighbouring sections. */
+.green{background:var(--field);color:var(--salt);padding:7rem 0}
+/* Cards — CENTERED IMAGE ON TOP, text below (was image-on-right side layout).
+   3D tilt vars --rx/--ry are set by script.js on hover. */
 .cards{display:grid;gap:1.25rem;margin-top:2.5rem}
-.card{display:grid;grid-template-columns:1fr 110px;gap:1rem;align-items:center;padding:1.5rem;border-radius:var(--r);background:var(--salt);color:var(--soil);transform:perspective(800px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s,box-shadow .3s}
+.card{display:grid;grid-template-columns:1fr;gap:.75rem;justify-items:center;text-align:center;padding:1.5rem;border-radius:var(--r);background:var(--salt);color:var(--soil);transform:perspective(800px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s,box-shadow .3s}
 .card:hover{box-shadow:0 24px 50px #0004}
-.card p{margin:.4rem 0 1rem;font-size:.95rem}
-.card img{rotate:-4deg;transition:rotate .35s,translate .35s} /* playful tilt, straightens + lifts on hover */
+.card img{width:min(70%,220px);margin:0 auto;rotate:-4deg;transition:rotate .35s,translate .35s} /* centered product image — EDIT min(70%,220px) to resize */
 .card:hover img{rotate:5deg;translate:0 -8px}
+.card>div{width:100%;padding:0 .5rem}
+.card p{margin:.4rem 0 1rem;font-size:.95rem}
+.card .btn{margin:.5rem 0 0}
 .card.alt{border-radius:64px var(--r) var(--r) var(--r)} /* the quirky "arched" card used for the middle cut */
-.tags{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0 1rem} /* size chips on product cards */
+.tags{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0 1rem;justify-content:center} /* size chips on product cards — centered to match the image */
 .tags li{list-style:none;padding:.15rem .7rem;border-radius:99px;background:var(--gold);font-size:.85rem;font-weight:700}
 .soon{display:inline-block;margin-bottom:.4rem;padding:.1rem .7rem;border-radius:99px;background:var(--soil);color:var(--gold);font-size:.8rem;font-weight:700} /* "Coming soon" badge */
 /* Vacuum / normal toggle — translucent white pill sits nicely on the green section */
-.seg{display:inline-flex;margin:1.5rem 0 0;padding:4px;border-radius:99px;background:#fff3}
+.seg{display:inline-flex;margin:1.5rem 0 0;padding:4px;border-radius:99px;background:#fff3;flex-wrap:wrap;max-width:100%}
 .seg button{padding:.6rem 1.2rem;border:0;border-radius:99px;background:none;color:inherit;font:700 .95rem var(--fb);cursor:pointer;transition:background .25s,color .25s}
 .seg button[aria-pressed=true]{background:var(--gold);color:var(--soil)} /* the active packaging option */
 /* Shelf-life line inside product cards — the only text the toggle swaps (data-v/data-n in script.js) */
@@ -189,6 +219,20 @@ body:not(.loading) .art>*{animation-play-state:running} /* rise waits for the pr
 .press img{width:100%;aspect-ratio:4/3;object-fit:cover;transition:transform .6s}
 .press a:hover img{transform:scale(1.07)} /* zoom-on-hover — .6s controls the glide speed */
 .press a:hover h3{color:var(--field)}
+.press .read-more{font-weight:700;font-size:.9rem;color:var(--field);text-decoration:none;margin-top:-.2rem} /* "Read more →" link under each news card */
+.press a:hover .read-more{color:var(--soil)}
+/* Two-column homepage news split: clients on one side, latest news on the other */
+.news-split{display:grid;gap:3rem;margin-top:1rem}
+.news-clients,.news-latest{display:grid;gap:1rem;align-content:start}
+/* CLIENT LOGOS GRID — 13 logos from /clients/ folder. EDIT the columns below to change density.
+   grayscale + opacity for an "as seen in" feel; on hover the logo lights up full colour. */
+.clients{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-top:1rem}
+.clients a{display:grid;place-items:center;padding:1rem;background:#fff;border-radius:12px;min-height:90px}
+.clients img{max-width:100%;max-height:60px;width:auto;height:auto;filter:grayscale(.5) opacity(.7);transition:filter .3s,transform .3s;object-fit:contain}
+.clients a:hover img{filter:grayscale(0) opacity(1);transform:scale(1.05)}
+/* Larger screens get 3 logos per row */
+@media(min-width:860px){.clients{grid-template-columns:repeat(3,1fr)}}
+.news-latest img{border-radius:var(--r);width:100%;height:auto}
 /* Two-column feature rows and photos */
 .split2{display:grid;gap:2rem;align-items:center}
 .photo{border-radius:var(--r);width:100%;aspect-ratio:4/3;object-fit:cover}
@@ -203,16 +247,18 @@ details p{padding-top:.6rem;max-width:60ch}
 /* CTA band */
 .cta{background:var(--gold);padding:4rem 0;text-align:center}
 .cta h2{margin-bottom:1.5rem}
-/* Contact */
-.cgrid{display:grid;gap:2.5rem}
-address{font-style:normal;font-size:1.1rem;margin:1rem 0}
+/* Contact — tightened (was padding 5rem via .sec, now 3rem; grid gap reduced) */
+.contact-sec{padding:3rem 0} /* EDIT this to squeeze the contact page more/less */
+.cgrid{display:grid;gap:2rem;align-items:start} /* was gap:2.5rem */
+address{font-style:normal;font-size:1.1rem;margin:.5rem 0}
 address a{font-weight:700}
-form{display:grid;gap:1rem}
+form{display:grid;gap:.85rem} /* was gap:1rem — tighter form spacing */
 label{display:grid;gap:.35rem;font-weight:600}
-input,textarea{padding:.9rem 1rem;border:2px solid var(--soil);border-radius:14px;background:#fff;color:var(--soil);font:inherit;transition:box-shadow .2s}
+input,textarea{padding:.9rem 1rem;border:2px solid var(--soil);border-radius:14px;background:#fff;color:var(--soil);font:inherit;transition:box-shadow .2s;min-width:0}
 input:focus,textarea:focus{outline:0;box-shadow:0 0 0 4px var(--gold)} /* gold focus halo */
+textarea{resize:vertical} /* let users drag the message box taller, not wider */
 [aria-invalid=true]{border-color:#8a1c0b} /* invalid field outline — light pages */
-.err{min-height:1.2em;color:#8a1c0b;font-weight:600} /* validation message — light pages */
+.err{min-height:1.2em;color:#8a1c0b;font-weight:600;overflow-wrap:anywhere} /* validation message — light pages */
 .legal{max-width:70ch;padding-top:8rem}.legal h2{margin-bottom:1.5rem}.legal h3{margin:1.5rem 0 .4rem} /* 8rem clears the fixed header */
 
 /* ===== 9. FOOTER ===== */
@@ -230,99 +276,67 @@ footer a:hover{color:var(--gold)}
 .top{bottom:calc(5rem + env(safe-area-inset-bottom,0px));background:var(--soil);color:var(--salt);opacity:0;pointer-events:none;transition:opacity .3s}
 .top.show{opacity:1;pointer-events:auto}
 
-/* ===== 10. DESKTOP (min 860px) — tablet landscape and up. Keep this value in sync with
-   the 860px check in script.js (menu auto-close) — they must match. ===== */
+/* ===== 10. RESPONSIVE — phones, tablets, desktops, smart displays =====
+   The hero art pins to the treeline at EVERY size because:
+   • flex:1 on .hgrid fills the hero (no centering slack)
+   • grid rows fill .hgrid's height (1fr on desktop, auto+1fr on mobile)
+   • .art stretches to fill its cell → .art bottom = treeline
+   • --dip and bottom values are fixed rem (no vw, no breakpoint overrides needed) */
+
+/* Desktop: tablet landscape and up (≥860px). Keep this value in sync with the 860px
+   check in script.js (menu auto-close) — they must match. */
 @media(min-width:860px){
-  #menu{position:static;flex-direction:row;gap:1.75rem;padding:0;background:none;clip-path:none;visibility:visible} /* menu becomes a plain header row */
+  #menu{margin-right: 10rem; position:static;flex-direction:row;gap:1.75rem;padding:0;background:none;clip-path:none;visibility:visible} /* menu becomes a plain header row (left side) */
   #menu a{font:600 .95rem var(--fb);color:var(--soil)}
   #menu a[aria-current]{color:var(--field);text-decoration:underline;text-underline-offset:6px}
   #burger{display:none}
   .intro,.split2,.cgrid{grid-template-columns:1fr 1fr;gap:4rem}
   .cards.three{grid-template-columns:repeat(3,1fr);align-items:start}
   .cards.four{grid-template-columns:repeat(2,1fr)}
-  .three .card{grid-template-columns:1fr}.three .card img{width:60%;order:-1} /* image on top for the 3-cut cards */
   .three .card:nth-child(2){margin-top:3rem} /* staggered middle card */
   .press{grid-template-columns:repeat(3,1fr)}
   .ph3{grid-template-columns:repeat(3,1fr)}
   .fgrid{grid-template-columns:1.4fr 1fr 1.4fr}
+  .news-split{grid-template-columns:1fr 1fr} /* two-column homepage news: clients | latest */
+  /* Desktop hero: two columns, single row fills the height */
+  .hgrid{grid-template-columns:1fr 1fr;grid-template-rows:1fr}
+  .art{min-height:400px}
+  /* Desktop sun/chips/pack — wider, still pinned to the treeline */
+  .sunimg{width:min (100vw,1500px); margin-bottom: -60px;}
+  .chips{width:min(28vw,300px);bottom:-7.8rem}
+  .pack{width:min(44vw,310px);left:-4rem;bottom:12rem}
 }
+
+/* Mobile + tablet portrait (≤859.98px): single column, text then art fills the rest */
+@media(max-width:859.98px){
+  .hgrid{grid-template-columns:1fr;grid-template-rows:auto 1fr} /* row 1 = text (auto), row 2 = art (fills to treeline) */
+  .sunimg{width:min(100vw,540px)}
+  .chips{width:min(42vw,420px);height:auto;bottom:-5rem;}
+  .pack{width:min(42vw,300px);height:auto;bottom:15rem;left: 24rem;}
+}
+
+/* Landscape phones & very short viewports (≤859.98px wide AND ≤500px tall) — scene shrinks to fit */
+@media(max-width:859.98px) and (max-height:500px){
+  .hero.home{padding-top:5rem;min-height:auto} /* less header gap, no forced full-height */
+  .art{min-height:140px}
+  .sunimg{width:min(75vw,320px); bottom: -60px;}
+  .chips{width:min(52vw,420px);height:auto;bottom:6rem;}
+  .pack{width:min(20vw,160px)}
+}
+
+/* Extra-small screens (Galaxy Fold etc., ≤400px) — tighten, never overflow */
+@media(max-width:400px){
+  .stats{gap:.5rem}
+  .stats b{font-size:2rem} /* smaller counter so "3,000+" always fits */
+  .stats span{font-size:.8rem}
+  .chips{width:min(42vw,420px);height:auto;bottom:-2rem;}
+  .pack{width:min(50vw,420px);height:auto;bottom:7rem;left: 4rem;}
+  
+}
+
 /* Respect users who opt out of motion: everything still works, nothing animates */
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
-/* Desktop hero layout — the art column gets more room */
-@media(min-width:860px){
-  .hgrid{grid-template-columns:1fr 1fr;align-items:center}
-  .art{min-height:440px}
-  .sunimg{width:min(40vw,520px)}
-  .chips{width:min(22vw,320px)}.pack{width:min(14vw,200px)}
-}
-
-/* ===== 11. UNIVERSAL FIT + HERO LOCK v2 — phones, tablets, desktops, smart displays =====
-   The hero art (sun / fries / pack) is PINNED TO THE SAVANNA SILHOUETTE at every screen
-   size, so it sits at the exact same depth everywhere:
-     • ≤859.98px  phones + tablets held portrait (iPad mini / iPad / Air / Pro 11")
-     • ≥860px     tablets held landscape (1024–1366), Surface Pro, smart displays, desktops
-   DEPTH DIALS (all fixed rem — no vw — so they're identical on every device in range):
-     • Sun   → .hero.home .art --dip   (deeper = sun sets further behind the treeline)
-     • Fries → .chips bottom           (more negative = sunk deeper into the silhouette)
-     • Pack  → .pack bottom            (≈0 = resting exactly on the treeline)            */
-
-/* --- (A) No horizontal overflow on ANY screen (280px foldables → ultrawide) --- */
-html{overflow-x:clip}                     /* viewport-level clip: rotated marquee + full-bleed soil band */
-.ht,.card>div,.stats>div{min-width:0}     /* grid children can never force the page wider */
-input,textarea{min-width:0}               /* inputs can't push past the form on tiny screens */
-address,.err,.lw{overflow-wrap:anywhere}  /* one long email/status word breaks instead of poking out */
-.stats{grid-template-columns:repeat(3,minmax(0,1fr))} /* "3,000+" shrinks its track, never the page */
-.seg{flex-wrap:wrap;max-width:100%}       /* packaging toggle stacks to two pills on narrow screens */
-.sk{flex:none}                            /* the skyline divider can never be squashed by the flex hero */
-
-/* --- (B) LOCK: phones + tablets in portrait (below the 860px breakpoint) ---
-   The home hero grid stretches to fill ALL space above the skyline, so the art
-   column's bottom edge lands exactly on the treeline on every device. */
-@media(max-width:859.98px){
-  .hero.home .hgrid{flex:1;margin-block:0;grid-template-rows:auto 1fr} /* stretch to the treeline — no centering slack */
-  .art{--dip:7rem}                   /* sun depth, inner pages */
-  .hero.home .art{--dip:4rem}        /* sun depth, home — the value you tuned on phones */
-  .chips{bottom:-3rem}               /* fries pile sunk into the treeline */
-  .pack{bottom:1rem}               /* pack just kissing the treeline */
-  .hero.home .ht{margin-top:1.5rem}  /* breathing room under the header — EDIT or delete */
-}
-
-/* --- (B+) Tablet-portrait tuning (600–859.98px: iPad mini/iPad/Air/Pro upright,
-   unfolded foldables). The sun renders up to 460px wide here, so it sets a touch
-   deeper to match the phone look. Delete this block for strict phone-identical values. --- */
-@media(min-width:600px) and (max-width:859.98px){
-  .hero.home .art{--dip:10rem}
-  .chips{bottom:-9rem}
-  .pack{bottom:-1rem}
-}
-
-/* --- (C) LOCK: tablets in landscape + desktops (≥860px). Same pinning, two-column
-   hero: the grid fills all space above the skyline, the ART column aligns to its
-   bottom edge (the treeline) while the text column keeps its vertical centre. --- */
-@media(min-width:860px){
-  .hero.home .hgrid{flex:1;margin-block:0} /* fill everything above the skyline — kills the centering slack */
-  .art{align-self:end}             /* pin the art column's base onto the treeline (text stays centred) */
-  .art{--dip:8rem}                 /* sun depth, inner pages — fixed value: identical on every screen */
-  .hero.home .art{--dip:7rem}     /* sun depth, home — was a vw clamp that shifted per device */
-  .chips{bottom:-5rem}             /* fries pile — old values were compensating for the float; retune freely */
-  .pack{bottom:2rem}              /* pack resting on the treeline */
-}
-
-/* --- (D) Landscape phones & very short viewports (≤859.98px wide AND ≤500px tall) ---
-   The full-height hero is cramped sideways-on, so the scene shrinks to fit. */
-@media(max-width:859.98px) and (max-height:500px){
-  .hero.home{padding-top:5rem}     /* tighter gap under the header */
-  .art{min-height:200px}           /* shorter art column */
-  .sunimg{width:min(50vw,300px)}   /* smaller sun */
-  .chips{width:min(30vw,220px)}    /* smaller fries pile */
-  .pack{width:min(18vw,130px)}     /* smaller pack */
-}
-
-/* --- (E) Extra-small screens (Galaxy Fold etc., ≤400px) — tighten, never overflow --- */
-@media(max-width:400px){
-  .stats{gap:.5rem}
-  .stats b{font-size:2rem}         /* smaller counter so "3,000+" always fits */
-  .stats span{font-size:.8rem}
-  .card{grid-template-columns:1fr clamp(80px,28vw,110px)} /* slimmer card thumbs */
-}
+/* Universal overflow protection — grid children can never force the page wider */
+.ht,.card>div,.stats>div{min-width:0}
+address,.err,.lw{overflow-wrap:anywhere} /* one long email/status word breaks instead of poking out */

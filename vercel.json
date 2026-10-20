@@ -4,7 +4,8 @@
   "redirects": [
     { "source": "/about-us", "destination": "/about", "permanent": true },
     { "source": "/our-products", "destination": "/products", "permanent": true },
-    { "source": "/new-frozen-fries", "destination": "/products/frozen-fries", "permanent": true },
+    { "source": "/new-frozen-fries", "destination": "/products", "permanent": true },
+    { "source": "/products/frozen-fries", "destination": "/products", "permanent": true },
     { "source": "/news-3", "destination": "/news", "permanent": true }
   ],
   "rewrites": [
