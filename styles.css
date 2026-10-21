@@ -312,7 +312,7 @@ footer a:hover{color:var(--gold)}
   .hgrid{grid-template-columns:1fr;grid-template-rows:auto 1fr} /* row 1 = text (auto), row 2 = art (fills to treeline) */
   .sunimg{width:min(100vw,540px)}
   .chips{width:min(42vw,420px);height:auto;bottom:-5rem;}
-  .pack{width:min(42vw,300px);height:auto;bottom:15rem;left: 24rem;}
+  .pack{width:min(42vw,300px);height:auto;bottom:7rem;left: 9rem;}
 }
 
 /* Landscape phones & very short viewports (≤859.98px wide AND ≤500px tall) — scene shrinks to fit */
