@@ -27,6 +27,9 @@
 <!-- Accessibility: lets keyboard users jump straight past the header -->
 <a class="skip" href="#app">Skip to content</a>
 
+<!-- No-JS fallback: sits above the preloader, which cannot be dismissed without JS -->
+<noscript><div class="nojs">Please enable JavaScript to view this site.<br>Call +254 725 690 901 or email info@serenifries.co.ke.</div></noscript>
+
 <!-- HOME PRELOADER — shows on the first visit per session, home page only (logic in boot()
      in script.js). Fries rise out of the box as the percentage climbs, the status line
      changes words, the logo pops in, then the gold curtain splits open. Click to skip.
@@ -53,7 +56,7 @@
 </header>
 
 <!-- Every page is rendered into this element by script.js -->
-<main id="app" tabindex="-1"><noscript>Please enable JavaScript to view this site. Call +254 725 690 901 or email info@serenifries.co.ke.</noscript></main>
+<main id="app" tabindex="-1"></main>
 
 <footer id="foot">
   <div class="wrap fgrid">

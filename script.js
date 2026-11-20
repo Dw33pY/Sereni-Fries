@@ -79,12 +79,13 @@ const img = (f, alt = '', c = '') => `<img class="${c}" src="${IMG}${f}" alt="${
 // number (only ever used inside .stats blocks — the /products shelf lines reuse the
 // attribute name for "normal sealed", which is why the counter is scoped in section 5).
 // Hero used on EVERY page: rays + clouds + the real Sun image (it carries the logo). Chips and
-// pack shots appear on home only. How deep the sun "sets" behind the skyline is the --dip
-// variable in styles.css §7. The Tree/Animals/Ground images from the old site are unused
+// pack shots appear on home only. The rays live INSIDE .art so the sunburst radiates from the
+// sun rather than the middle of the page. How deep the sun sets behind the skyline is the
+// -5.6vw on .sunw in styles.css §7. The Tree/Animals/Ground images from the old site are unused
 // (their placement was unknown) — drop them inside .art if you ever want them.
-const hero = (h, p, home) => `<section class="hero${home ? ' home' : ''}" data-hero><div class="rays"></div><i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i>
+const hero = (h, p, home) => `<section class="hero${home ? ' home' : ''}" data-hero><i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i>
   <div class="wrap hgrid"><div class="ht"><h1 data-split>${h}</h1><p>${p}</p>${home ? '<a class="btn" href="/products">See our cuts</a><a class="btn ghost" href="/contact">Place an order</a>' : ''}</div>
-  <div class="art"><div class="sunw"><img class="sunimg" src="${IMG}Sun_SlideSHow.png" alt="Sereni Fries" fetchpriority="high"></div>${home ? `<img class="chips" src="${IMG}Chips_SlideSHow.png" alt="Golden fries"><img class="pack" src="${IMG}Pack_medium2.png" alt="Sereni Fries medium cut pack">` : ''}</div></div>${sk()}</section>`;
+  <div class="art"><div class="rays"></div><div class="sunw"><img class="sunimg" src="${IMG}Sun_SlideSHow.png" alt="Sereni Fries" fetchpriority="high"></div>${home ? `<img class="chips" src="${IMG}Chips_SlideSHow.png" alt="Golden fries"><img class="pack" src="${IMG}Pack_medium2.png" alt="Sereni Fries medium cut pack">` : ''}</div></div>${sk()}</section>`;
 // Savanna silhouette divider (bottom of every hero and some pages) — recoloured to --soil in CSS
 const sk = (c = '') => `<div class="sk ${c}" aria-hidden="true"><img src="${IMG}SkylineSavana_Divider.png" alt="" decoding="async"></div>`;
 // The three frozen cut cards (home + /products). Middle card gets the arched .alt style
@@ -110,8 +111,8 @@ const PAGES = {
     <section class="green"><div class="wrap"><h2 data-split>Three cuts, one standard of care.</h2><div class="cards three">${cuts()}</div></div></section>
     <section class="wrap sec"><h2 data-split>Clients &amp; news</h2>
       <div class="news-split" data-r>
-        <div class="news-clients"><h2>Who we supply</h2><div class="clients">${CLIENTS.map(c => `<a href="#" onclick="return false" aria-label="${c.replace(/\.[a-z]+$/,'').replace(/[-_]/g,' ')}"><img src="/clients/${encodeURIComponent(c)}" alt="${c.replace(/\.[a-z]+$/,'').replace(/[-_]/g,' ')}" loading="lazy" decoding="async"></a>`).join('')}</div></div>
-        <div class="news-latest"><h2>Latest news</h2>${press()}<a class="btn ghost" href="/news" style="justify-self:start">See all news →</a></div>
+        <div class="news-clients"><h2>Who we supply</h2><div class="clients">${CLIENTS.map(c => `<div class="cl"><img src="/clients/${encodeURIComponent(c)}" alt="${c.replace(/\.[a-z]+$/,'').replace(/[-_]/g,' ')}" loading="lazy" decoding="async"></div>`).join('')}</div></div>
+        <div class="news-latest"><h2>Latest news</h2>${press()}<a class="btn ghost self-start" href="/news">See all news →</a></div>
       </div></section>` + cta },
   // ---- ABOUT ----
   '/about': { t: 'About us – Sereni Fries', d: 'Our story, mission, vision, core values, production and supply at Sereni Fries, Kenya’s potato processing pioneer.',
